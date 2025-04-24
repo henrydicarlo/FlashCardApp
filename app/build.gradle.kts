@@ -78,4 +78,9 @@ dependencies {
     // Navigation Components
     implementation("androidx.navigation:navigation-compose:2.7.5")
 
+    // Dependências de navegação Jetpack Compose
+    implementation("androidx.navigation:navigation-compose:2.7.6")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+
 }

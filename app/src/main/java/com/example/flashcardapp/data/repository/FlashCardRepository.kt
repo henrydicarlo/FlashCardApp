@@ -224,4 +224,6 @@ class FlashcardRepository(
 
     suspend fun getFlashcardsForNewLocation(locationId: Long, limit: Int = 10) =
         flashcardDao.getFlashcardsNotReviewedAtLocation(locationId, limit)
+
+
 }

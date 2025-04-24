@@ -8,6 +8,7 @@ import com.example.flashcardapp.data.entities.Deck
 import com.example.flashcardapp.data.entities.Flashcard
 import com.example.flashcardapp.data.entities.StudyLocation
 import com.example.flashcardapp.data.repository.FlashcardRepository
+import com.example.flashcardapp.services.LocationService
 import com.example.flashcardapp.ui.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
  */
 class FlashcardAppViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FlashcardRepository(application)
+    private val locationService = LocationService(application)
 
     // Estado para estatísticas do usuário
     private val _userStatsUiState = MutableStateFlow(UserStatsUiState())
@@ -137,6 +139,19 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+
+    // Adicionado
+    suspend fun getAllFlashcardsForDeck(deckId: Long): List<Flashcard> {
+        return repository.getFlashcardsByDeck(deckId).first()
+    }
+
+    fun deleteFlashcard(flashcard: Flashcard) {
+        viewModelScope.launch {
+            repository.deleteFlashcard(flashcard)
+        }
+    }
+
+
     // Funções para sessão de estudo
 
     fun startStudySession(deckId: Long? = null) {
@@ -242,4 +257,6 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+
+
 }
