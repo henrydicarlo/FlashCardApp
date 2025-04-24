@@ -1,13 +1,40 @@
 package com.example.flashcardapp.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.Icons.Default
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,9 +42,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -27,7 +55,7 @@ fun DashboardScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 32.dp) //
+                .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
             // Cabeçalho
             Row(
@@ -43,7 +71,7 @@ fun DashboardScreen() {
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Default.Place,
+                        imageVector = Icons.Default.Place,
                         contentDescription = "Local",
                         tint = Color.Red
                     )
@@ -52,7 +80,7 @@ fun DashboardScreen() {
                         color = Color.White
                     )
                     Icon(
-                        imageVector = Default.KeyboardArrowRight,
+                        imageVector = Icons.Default.KeyboardArrowRight,
                         contentDescription = "Ir",
                         tint = Color.White
                     )
@@ -62,7 +90,7 @@ fun DashboardScreen() {
             Spacer(modifier = Modifier.height(24.dp))
 
             StatusCard(
-                icon = Default.FlashOn,
+                icon = Icons.Default.FlashOn,
                 iconColor = Color.Yellow,
                 value = "0%",
                 label = "Taxa de acertos"
@@ -70,7 +98,7 @@ fun DashboardScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             StatusCard(
-                icon = Default.Whatshot,
+                icon = Icons.Default.Whatshot,
                 iconColor = Color.Red,
                 value = "0",
                 label = "Dias seguidos de estudo"
@@ -78,24 +106,14 @@ fun DashboardScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             StatusCard(
-                icon = Default.EmojiEvents,
+                icon = Icons.Default.EmojiEvents,
                 iconColor = Color(0xFFFFD700),
                 value = "0",
-                label = "Record de dias"
+                label = "Recorde de dias"
             )
         }
 
-        // FAB
-        FloatingActionButton(
-            onClick = { /* ação ao clicar */ },
-            containerColor = Color(0xFF2E3B00),
-            contentColor = Color.White,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(Default.Add, contentDescription = "Adicionar")
-        }
+        FloatingMenuButton(navController)
     }
 }
 
@@ -136,4 +154,59 @@ fun StatusCard(icon: ImageVector, iconColor: Color, value: String, label: String
         }
     }
 }
+
+@Composable
+fun FloatingMenuButton(navController: NavController) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            AnimatedVisibility(visible = expanded) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        expanded = false
+                        navController.navigate("add_flashcard")
+                    },
+                    icon = { Icon(Icons.Default.Edit, contentDescription = "Adicionar FlashCard") },
+                    text = { Text("Adicionar FlashCard") },
+                    containerColor = Color(0xFF2E3B00),
+                    contentColor = Color.White
+                )
+            }
+
+            AnimatedVisibility(visible = expanded) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        expanded = false
+                        navController.navigate("add_deck")
+                    },
+                    icon = { Icon(Icons.Default.Folder, contentDescription = "Novo Deck") },
+                    text = { Text("Novo Deck") },
+                    containerColor = Color(0xFF2E3B00),
+                    contentColor = Color.White
+                )
+            }
+
+            FloatingActionButton(
+                onClick = { expanded = !expanded },
+                containerColor = Color(0xFF2E3B00),
+                contentColor = Color.White,
+            ) {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.Close else Icons.Default.Add,
+                    contentDescription = "Menu"
+                )
+            }
+        }
+    }
+}
+
 
