@@ -1,0 +1,908 @@
+Index: .idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15_[Changes]/shelved.patch
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15_[Changes]/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15_[Changes]/shelved.patch
+new file mode 100644
+--- /dev/null	(date 1746233448601)
++++ b/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15_[Changes]/shelved.patch	(date 1746233448601)
+@@ -0,0 +1,227 @@
++Index: .idea/kotlinc.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
++new file mode 100644
++--- /dev/null	(date 1744935192501)
+++++ b/.idea/kotlinc.xml	(date 1744935192501)
++@@ -0,0 +1,6 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="KotlinJpsPluginSettings">
+++    <option name="version" value="2.0.0" />
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/.gitignore
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/.gitignore b/.idea/.gitignore
++new file mode 100644
++--- /dev/null	(date 1744932759079)
+++++ b/.idea/.gitignore	(date 1744932759079)
++@@ -0,0 +1,3 @@
+++# Default ignored files
+++/shelf/
+++/workspace.xml
++Index: .idea/inspectionProfiles/Project_Default.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/inspectionProfiles/Project_Default.xml b/.idea/inspectionProfiles/Project_Default.xml
++new file mode 100644
++--- /dev/null	(date 1744992512411)
+++++ b/.idea/inspectionProfiles/Project_Default.xml	(date 1744992512411)
++@@ -0,0 +1,57 @@
+++<component name="InspectionProjectProfileManager">
+++  <profile version="1.0">
+++    <option name="myName" value="Project Default" />
+++    <inspection_tool class="ComposePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="ComposePreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="ComposePreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="ComposePreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewAnnotationInFunctionWithParameters" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewApiLevelMustBeValid" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewDeviceShouldUseNewSpec" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewFontScaleMustBeGreaterThanZero" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewMultipleParameterProviders" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewPickerAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++  </profile>
+++</component>
++\ No newline at end of file
++Index: .idea/gradle.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/gradle.xml b/.idea/gradle.xml
++new file mode 100644
++--- /dev/null	(date 1744935186945)
+++++ b/.idea/gradle.xml	(date 1744935186945)
++@@ -0,0 +1,20 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="GradleMigrationSettings" migrationVersion="1" />
+++  <component name="GradleSettings">
+++    <option name="linkedExternalProjectsSettings">
+++      <GradleProjectSettings>
+++        <option name="testRunner" value="CHOOSE_PER_TEST" />
+++        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+++        <option name="gradleJvm" value="#JAVA_HOME" />
+++        <option name="modules">
+++          <set>
+++            <option value="$PROJECT_DIR$" />
+++            <option value="$PROJECT_DIR$/app" />
+++          </set>
+++        </option>
+++        <option name="resolveExternalAnnotations" value="false" />
+++      </GradleProjectSettings>
+++    </option>
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/deploymentTargetSelector.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
++new file mode 100644
++--- /dev/null	(date 1744935192515)
+++++ b/.idea/deploymentTargetSelector.xml	(date 1744935192515)
++@@ -0,0 +1,10 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="deploymentTargetSelector">
+++    <selectionStates>
+++      <SelectionState runConfigName="app">
+++        <option name="selectionMode" value="DROPDOWN" />
+++      </SelectionState>
+++    </selectionStates>
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/compiler.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/compiler.xml b/.idea/compiler.xml
++new file mode 100644
++--- /dev/null	(date 1744935186922)
+++++ b/.idea/compiler.xml	(date 1744935186922)
++@@ -0,0 +1,6 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="CompilerConfiguration">
+++    <bytecodeTargetLevel target="21" />
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/runConfigurations.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/runConfigurations.xml b/.idea/runConfigurations.xml
++new file mode 100644
++--- /dev/null	(date 1744932955743)
+++++ b/.idea/runConfigurations.xml	(date 1744932955743)
++@@ -0,0 +1,17 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="RunConfigurationProducerService">
+++    <option name="ignoredProducers">
+++      <set>
+++        <option value="com.intellij.execution.junit.AbstractAllInDirectoryConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.AllInPackageConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.PatternConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.TestInClassConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.UniqueIdConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.testDiscovery.JUnitTestDiscoveryConfigurationProducer" />
+++        <option value="org.jetbrains.kotlin.idea.junit.KotlinJUnitRunConfigurationProducer" />
+++        <option value="org.jetbrains.kotlin.idea.junit.KotlinPatternConfigurationProducer" />
+++      </set>
+++    </option>
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/.name
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/.name b/.idea/.name
++new file mode 100644
++--- /dev/null	(date 1744935186342)
+++++ b/.idea/.name	(date 1744935186342)
++@@ -0,0 +1,1 @@
+++FlashCardApp
++\ No newline at end of file
++Index: .idea/misc.xml
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
++<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CodeInsightWorkspaceSettings\">\r\n    <option name=\"optimizeImportsOnTheFly\" value=\"true\" />\r\n  </component>\r\n  <component name=\"KotlinCodeInsightWorkspaceSettings\">\r\n    <option name=\"optimizeImportsOnTheFly\" value=\"true\" />\r\n  </component>\r\n</project>
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/.idea/misc.xml b/.idea/misc.xml
++--- a/.idea/misc.xml	(revision 4f240a4434cf5c770a4113ceb657b3f7eb637c28)
+++++ b/.idea/misc.xml	(date 1744995858648)
++@@ -3,7 +3,5 @@
++   <component name="CodeInsightWorkspaceSettings">
++     <option name="optimizeImportsOnTheFly" value="true" />
++   </component>
++-  <component name="KotlinCodeInsightWorkspaceSettings">
++-    <option name="optimizeImportsOnTheFly" value="true" />
++-  </component>
+++  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="21" project-jdk-type="JavaSDK" />
++ </project>
++\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_1.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_1.xml b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_1.xml
+new file mode 100644
+--- /dev/null	(date 1746233448600)
++++ b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_1.xml	(date 1746233448600)
+@@ -0,0 +1,4 @@
++<changelist name="Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]1" date="1745533650292" recycled="true" deleted="true">
++  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]1/shelved.patch" />
++  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 24/04/2025 19:27 [Changes]" />
++</changelist>
+\ No newline at end of file
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\n    alias(libs.plugins.android.application)\n    alias(libs.plugins.kotlin.android)\n    alias(libs.plugins.kotlin.compose)\n    id(\"kotlin-kapt\")\n    id(\"com.google.android.libraries.mapsplatform.secrets-gradle-plugin\")\n}\n\nandroid {\n    namespace = \"com.example.flashcardapp\"\n    compileSdk = 35\n\n    defaultConfig {\n        applicationId = \"com.example.flashcardapp\"\n        minSdk = 26\n        targetSdk = 35\n        versionCode = 1\n        versionName = \"1.0\"\n\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\n    }\n\n    buildTypes {\n        release {\n            isMinifyEnabled = false\n            proguardFiles(\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\n                \"proguard-rules.pro\"\n            )\n        }\n    }\n    compileOptions {\n        sourceCompatibility = JavaVersion.VERSION_11\n        targetCompatibility = JavaVersion.VERSION_11\n    }\n    kotlinOptions {\n        jvmTarget = \"11\"\n    }\n    buildFeatures {\n        compose = true\n    }\n}\n\ndependencies {\n\n    implementation(libs.androidx.core.ktx)\n    implementation(libs.androidx.lifecycle.runtime.ktx)\n    implementation(libs.androidx.activity.compose)\n    implementation(platform(libs.androidx.compose.bom))\n    implementation(libs.androidx.ui)\n    implementation(libs.androidx.ui.graphics)\n    implementation(libs.androidx.ui.tooling.preview)\n    implementation(libs.androidx.material3)\n    testImplementation(libs.junit)\n    androidTestImplementation(libs.androidx.junit)\n    androidTestImplementation(libs.androidx.espresso.core)\n    androidTestImplementation(platform(libs.androidx.compose.bom))\n    androidTestImplementation(libs.androidx.ui.test.junit4)\n    debugImplementation(libs.androidx.ui.tooling)\n    debugImplementation(libs.androidx.ui.test.manifest)\n\n    // ViewModel and LiveData\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0\")\n    implementation(\"androidx.lifecycle:lifecycle-livedata-ktx:2.7.0\")\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0\")\n\n    // Room Database\n    implementation(\"androidx.room:room-runtime:2.6.1\")\n    implementation(\"androidx.room:room-ktx:2.6.1\")\n    kapt(\"androidx.room:room-compiler:2.6.1\")\n\n    // Kotlin Coroutines\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3\")\n\n    // Location Services\n    implementation(\"com.google.android.gms:play-services-location:21.0.1\")\n\n    // Navigation Components\n    implementation(\"androidx.navigation:navigation-compose:2.7.5\")\n\n    // Dependências de navegação Jetpack Compose\n    implementation(\"androidx.navigation:navigation-compose:2.7.6\")\n\n    implementation(\"org.jetbrains.kotlin:kotlin-stdlib:1.9.10\")\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision a27b306fef7d4888f17abd3414af55e99de4fd98)
++++ b/app/build.gradle.kts	(date 1746233448602)
+@@ -58,6 +58,8 @@
+     androidTestImplementation(libs.androidx.ui.test.junit4)
+     debugImplementation(libs.androidx.ui.tooling)
+     debugImplementation(libs.androidx.ui.test.manifest)
++    implementation(libs.androidx.material.icons.extended)
++
+ 
+     // ViewModel and LiveData
+     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"CodeInsightWorkspaceSettings\">\n    <option name=\"optimizeImportsOnTheFly\" value=\"true\" />\n  </component>\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_21\" default=\"true\" project-jdk-name=\"jbr-21\" project-jdk-type=\"JavaSDK\" />\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision a27b306fef7d4888f17abd3414af55e99de4fd98)
++++ b/.idea/misc.xml	(date 1746233448599)
+@@ -3,6 +3,7 @@
+   <component name="CodeInsightWorkspaceSettings">
+     <option name="optimizeImportsOnTheFly" value="true" />
+   </component>
+-  <component name="ExternalStorageConfigurationManager" enabled="true" />
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
++  <component name="KotlinCodeInsightWorkspaceSettings">
++    <option name="optimizeImportsOnTheFly" value="true" />
++  </component>
+ </project>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_.xml b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_.xml
+new file mode 100644
+--- /dev/null	(date 1746233448600)
++++ b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27__Changes_.xml	(date 1746233448600)
+@@ -0,0 +1,4 @@
++<changelist name="Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]" date="1745533631676" recycled="false" toDelete="true">
++  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]/shelved.patch" />
++  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 24/04/2025 19:27 [Changes]" />
++</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]/shelved.patch
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]/shelved.patch
+new file mode 100644
+--- /dev/null	(date 1746233448600)
++++ b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]/shelved.patch	(date 1746233448600)
+@@ -0,0 +1,75 @@
++Index: app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
++<+>package com.example.flashcardapp.screens\r\n\r\n\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.compose.foundation.layout.Box\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\n\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n\r\n                Box(\r\n                    modifier = Modifier.fillMaxSize(),\r\n                    contentAlignment = Alignment.Center\r\n                ) {\r\n                    Text(text = \"Olá Mundo\", style = MaterialTheme.typography.headlineMedium)\r\n                }\r\n\r\n        }\r\n    }\r\n}\r\n
++===================================================================
++diff --git a/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt b/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt
++--- a/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt	(revision 4acba08905c4dcf74152933b64116b5dcc02df7d)
+++++ b/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt	(date 1745451298803)
++@@ -1,28 +1,50 @@
++ package com.example.flashcardapp.screens
++ 
++-
++-import android.os.Bundle
++-import androidx.activity.ComponentActivity
++-import androidx.activity.compose.setContent
+++import androidx.compose.foundation.background
++ import androidx.compose.foundation.layout.Box
+++import androidx.compose.foundation.layout.Column
++ import androidx.compose.foundation.layout.fillMaxSize
++-import androidx.compose.material3.MaterialTheme
+++import androidx.compose.foundation.layout.padding
+++import androidx.compose.material.icons.Icons.Default
+++import androidx.compose.material.icons.filled.Add
+++import androidx.compose.material3.FloatingActionButton
+++import androidx.compose.material3.Icon
++ import androidx.compose.material3.Text
+++import androidx.compose.runtime.Composable
++ import androidx.compose.ui.Alignment
++ import androidx.compose.ui.Modifier
+++import androidx.compose.ui.graphics.Color
+++import androidx.compose.ui.unit.dp
++ 
++-class MainActivity : ComponentActivity() {
++-    override fun onCreate(savedInstanceState: Bundle?) {
++-        super.onCreate(savedInstanceState)
++-        setContent {
++-
++-                Box(
++-                    modifier = Modifier.fillMaxSize(),
++-                    contentAlignment = Alignment.Center
++-                ) {
++-                    Text(text = "Olá Mundo", style = MaterialTheme.typography.headlineMedium)
++-                }
+++@Composable
+++fun AddCardScreen() {
+++    Box(
+++        modifier = Modifier
+++            .fillMaxSize()
+++            .background(Color(0xFF5D2316))
+++            .padding(16.dp)
+++    ) {
+++        Column(
+++            modifier = Modifier
+++                .fillMaxSize()
+++                .padding(horizontal = 24.dp, vertical = 32.dp) //
+++        ) {
+++            Text("ola")
+++        }
++ 
+++        // FAB
+++        FloatingActionButton(
+++            onClick = { },
+++            containerColor = Color(0xFF2E3B00),
+++            contentColor = Color.White,
+++            modifier = Modifier
+++                .align(Alignment.BottomEnd)
+++                .padding(16.dp)
+++        ) {
+++            Icon(Default.Add, contentDescription = "Adicionar")
++         }
++     }
++ }
+++
+++
+++
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]1/shelved.patch
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]1/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]1/shelved.patch
+new file mode 100644
+--- /dev/null	(date 1746233448600)
++++ b/.idea/shelf/Uncommitted_changes_before_Checkout_at_24_04_2025_19_27_[Changes]1/shelved.patch	(date 1746233448600)
+@@ -0,0 +1,261 @@
++Index: app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
++<+>package com.example.flashcardapp.screens\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.Icons.Default\r\nimport androidx.compose.material.icons.filled.*\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.graphics.vector.ImageVector\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\n\r\n@Composable\r\nfun DashboardScreen() {\r\n    Box(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(Color(0xFF5D2316))\r\n            .padding(16.dp)\r\n    ) {\r\n        Column(\r\n            modifier = Modifier\r\n                .fillMaxSize()\r\n                .padding(horizontal = 24.dp, vertical = 32.dp) //\r\n        ) {\r\n            // Cabeçalho\r\n            Row(\r\n                modifier = Modifier.fillMaxWidth(),\r\n                horizontalArrangement = Arrangement.SpaceBetween,\r\n                verticalAlignment = Alignment.CenterVertically\r\n            ) {\r\n                Text(\r\n                    text = \"FlashcardsApp\",\r\n                    fontSize = 24.sp,\r\n                    fontWeight = FontWeight.Bold,\r\n                    color = Color.White\r\n                )\r\n                Row(verticalAlignment = Alignment.CenterVertically) {\r\n                    Icon(\r\n                        imageVector = Default.Place,\r\n                        contentDescription = \"Local\",\r\n                        tint = Color.Red\r\n                    )\r\n                    Text(\r\n                        text = \"sala\",\r\n                        color = Color.White\r\n                    )\r\n                    Icon(\r\n                        imageVector = Default.KeyboardArrowRight,\r\n                        contentDescription = \"Ir\",\r\n                        tint = Color.White\r\n                    )\r\n                }\r\n            }\r\n\r\n            Spacer(modifier = Modifier.height(24.dp))\r\n\r\n            StatusCard(\r\n                icon = Default.FlashOn,\r\n                iconColor = Color.Yellow,\r\n                value = \"0%\",\r\n                label = \"Taxa de acertos\"\r\n            )\r\n            Spacer(modifier = Modifier.height(8.dp))\r\n\r\n            StatusCard(\r\n                icon = Default.Whatshot,\r\n                iconColor = Color.Red,\r\n                value = \"0\",\r\n                label = \"Dias seguidos de estudo\"\r\n            )\r\n            Spacer(modifier = Modifier.height(8.dp))\r\n\r\n            StatusCard(\r\n                icon = Default.EmojiEvents,\r\n                iconColor = Color(0xFFFFD700),\r\n                value = \"0\",\r\n                label = \"Record de dias\"\r\n            )\r\n        }\r\n\r\n        // FAB\r\n        FloatingActionButton(\r\n            onClick = { /* ação ao clicar */ },\r\n            containerColor = Color(0xFF2E3B00),\r\n            contentColor = Color.White,\r\n            modifier = Modifier\r\n                .align(Alignment.BottomEnd)\r\n                .padding(16.dp)\r\n        ) {\r\n            Icon(Default.Add, contentDescription = \"Adicionar\")\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun StatusCard(icon: ImageVector, iconColor: Color, value: String, label: String) {\r\n    Card(\r\n        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A2F1B)),\r\n        shape = RoundedCornerShape(8.dp),\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .height(60.dp),\r\n        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)\r\n    ) {\r\n        Row(\r\n            verticalAlignment = Alignment.CenterVertically,\r\n            modifier = Modifier.padding(horizontal = 16.dp)\r\n        ) {\r\n            Icon(\r\n                imageVector = icon,\r\n                contentDescription = null,\r\n                tint = iconColor,\r\n                modifier = Modifier.size(24.dp)\r\n            )\r\n            Spacer(modifier = Modifier.width(12.dp))\r\n            Column {\r\n                Text(\r\n                    text = value,\r\n                    fontWeight = FontWeight.Bold,\r\n                    color = Color.Yellow,\r\n                    fontSize = 16.sp\r\n                )\r\n                Text(\r\n                    text = label,\r\n                    color = Color.White,\r\n                    fontSize = 12.sp\r\n                )\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt b/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt
++--- a/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt	(revision 4acba08905c4dcf74152933b64116b5dcc02df7d)
+++++ b/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt	(date 1745451720972)
++@@ -1,5 +1,6 @@
++ package com.example.flashcardapp.screens
++ 
+++import android.content.Intent
++ import androidx.compose.foundation.background
++ import androidx.compose.foundation.layout.*
++ import androidx.compose.foundation.shape.RoundedCornerShape
++@@ -12,9 +13,12 @@
++ import androidx.compose.ui.Modifier
++ import androidx.compose.ui.graphics.Color
++ import androidx.compose.ui.graphics.vector.ImageVector
+++import androidx.compose.ui.platform.LocalContext
++ import androidx.compose.ui.text.font.FontWeight
++ import androidx.compose.ui.unit.dp
++ import androidx.compose.ui.unit.sp
+++import androidx.core.content.ContextCompat.startActivity
+++import com.example.flashcardapp.screens.AddCardScreen
++ 
++ @Composable
++ fun DashboardScreen() {
++@@ -87,7 +91,10 @@
++ 
++         // FAB
++         FloatingActionButton(
++-            onClick = { /* ação ao clicar */ },
+++            onClick = {
+++                val intent = Intent(this,AddCardScreen::class.java);
+++                startActivity(intent);
+++            },
++             containerColor = Color(0xFF2E3B00),
++             contentColor = Color.White,
++             modifier = Modifier
++Index: app/src/main/java/com/example/flashcardapp/MainActivity.kt
++IDEA additional info:
++Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
++<+>package com.example.flashcardapp\r\n\r\nimport com.example.flashcardapp.ui.theme.FlashCardAppTheme\r\n\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.activity.enableEdgeToEdge\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.compose.material3.Scaffold\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.activity.compose.setContent\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.Surface\r\nimport com.example.flashcardapp.screens.DashboardScreen\r\n\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n            MaterialTheme {\r\n                Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {\r\n                    DashboardScreen()\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun Greeting(name: String, modifier: Modifier = Modifier) {\r\n    Text(\r\n        text = \"Hello $name!\",\r\n        modifier = modifier\r\n    )\r\n}\r\n\r\n@Preview(showBackground = true)\r\n@Composable\r\nfun GreetingPreview() {\r\n    FlashCardAppTheme {\r\n        Greeting(\"Android\")\r\n    }\r\n}
++Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
++<+>UTF-8
++===================================================================
++diff --git a/app/src/main/java/com/example/flashcardapp/MainActivity.kt b/app/src/main/java/com/example/flashcardapp/MainActivity.kt
++--- a/app/src/main/java/com/example/flashcardapp/MainActivity.kt	(revision 4acba08905c4dcf74152933b64116b5dcc02df7d)
+++++ b/app/src/main/java/com/example/flashcardapp/MainActivity.kt	(date 1745451474991)
++@@ -1,22 +1,17 @@
++ package com.example.flashcardapp
++ 
++-import com.example.flashcardapp.ui.theme.FlashCardAppTheme
++-
++ import android.os.Bundle
++ import androidx.activity.ComponentActivity
++ import androidx.activity.compose.setContent
++-import androidx.activity.enableEdgeToEdge
++ import androidx.compose.foundation.layout.fillMaxSize
++-import androidx.compose.foundation.layout.padding
++-import androidx.compose.material3.Scaffold
+++import androidx.compose.material3.MaterialTheme
+++import androidx.compose.material3.Surface
++ import androidx.compose.material3.Text
++ import androidx.compose.runtime.Composable
++ import androidx.compose.ui.Modifier
++ import androidx.compose.ui.tooling.preview.Preview
++-import androidx.activity.compose.setContent
++-import androidx.compose.material3.MaterialTheme
++-import androidx.compose.material3.Surface
++ import com.example.flashcardapp.screens.DashboardScreen
+++import com.example.flashcardapp.ui.theme.FlashCardAppTheme
++ 
++ class MainActivity : ComponentActivity() {
++     override fun onCreate(savedInstanceState: Bundle?) {
++Index: .idea/kotlinc.xml
++===================================================================
++diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
++new file mode 100644
++--- /dev/null	(date 1744996561452)
+++++ b/.idea/kotlinc.xml	(date 1744996561452)
++@@ -0,0 +1,6 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="KotlinJpsPluginSettings">
+++    <option name="version" value="2.0.0" />
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/.gitignore
++===================================================================
++diff --git a/.idea/.gitignore b/.idea/.gitignore
++new file mode 100644
++--- /dev/null	(date 1744996561462)
+++++ b/.idea/.gitignore	(date 1744996561462)
++@@ -0,0 +1,3 @@
+++# Default ignored files
+++/shelf/
+++/workspace.xml
++Index: .idea/runConfigurations.xml
++===================================================================
++diff --git a/.idea/runConfigurations.xml b/.idea/runConfigurations.xml
++new file mode 100644
++--- /dev/null	(date 1744996561503)
+++++ b/.idea/runConfigurations.xml	(date 1744996561503)
++@@ -0,0 +1,17 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="RunConfigurationProducerService">
+++    <option name="ignoredProducers">
+++      <set>
+++        <option value="com.intellij.execution.junit.AbstractAllInDirectoryConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.AllInPackageConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.PatternConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.TestInClassConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.UniqueIdConfigurationProducer" />
+++        <option value="com.intellij.execution.junit.testDiscovery.JUnitTestDiscoveryConfigurationProducer" />
+++        <option value="org.jetbrains.kotlin.idea.junit.KotlinJUnitRunConfigurationProducer" />
+++        <option value="org.jetbrains.kotlin.idea.junit.KotlinPatternConfigurationProducer" />
+++      </set>
+++    </option>
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/.name
++===================================================================
++diff --git a/.idea/.name b/.idea/.name
++new file mode 100644
++--- /dev/null	(date 1744996561514)
+++++ b/.idea/.name	(date 1744996561514)
++@@ -0,0 +1,1 @@
+++FlashCardApp
++\ No newline at end of file
++Index: .idea/inspectionProfiles/Project_Default.xml
++===================================================================
++diff --git a/.idea/inspectionProfiles/Project_Default.xml b/.idea/inspectionProfiles/Project_Default.xml
++new file mode 100644
++--- /dev/null	(date 1744996593721)
+++++ b/.idea/inspectionProfiles/Project_Default.xml	(date 1744996593721)
++@@ -0,0 +1,57 @@
+++<component name="InspectionProjectProfileManager">
+++  <profile version="1.0">
+++    <option name="myName" value="Project Default" />
+++    <inspection_tool class="ComposePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="ComposePreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="ComposePreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="ComposePreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewMustBeTopLevelFunction" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewNeedsComposableAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="GlancePreviewNotSupportedInUnitTestFiles" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewAnnotationInFunctionWithParameters" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewApiLevelMustBeValid" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewDeviceShouldUseNewSpec" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewFontScaleMustBeGreaterThanZero" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewMultipleParameterProviders" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++    <inspection_tool class="PreviewPickerAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
+++      <option name="composableFile" value="true" />
+++      <option name="previewFile" value="true" />
+++    </inspection_tool>
+++  </profile>
+++</component>
++\ No newline at end of file
++Index: .idea/gradle.xml
++===================================================================
++diff --git a/.idea/gradle.xml b/.idea/gradle.xml
++new file mode 100644
++--- /dev/null	(date 1744996561478)
+++++ b/.idea/gradle.xml	(date 1744996561478)
++@@ -0,0 +1,20 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="GradleMigrationSettings" migrationVersion="1" />
+++  <component name="GradleSettings">
+++    <option name="linkedExternalProjectsSettings">
+++      <GradleProjectSettings>
+++        <option name="testRunner" value="CHOOSE_PER_TEST" />
+++        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+++        <option name="gradleJvm" value="#JAVA_HOME" />
+++        <option name="modules">
+++          <set>
+++            <option value="$PROJECT_DIR$" />
+++            <option value="$PROJECT_DIR$/app" />
+++          </set>
+++        </option>
+++        <option name="resolveExternalAnnotations" value="false" />
+++      </GradleProjectSettings>
+++    </option>
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/deploymentTargetSelector.xml
++===================================================================
++diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
++new file mode 100644
++--- /dev/null	(date 1744996561486)
+++++ b/.idea/deploymentTargetSelector.xml	(date 1744996561486)
++@@ -0,0 +1,10 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="deploymentTargetSelector">
+++    <selectionStates>
+++      <SelectionState runConfigName="app">
+++        <option name="selectionMode" value="DROPDOWN" />
+++      </SelectionState>
+++    </selectionStates>
+++  </component>
+++</project>
++\ No newline at end of file
++Index: .idea/compiler.xml
++===================================================================
++diff --git a/.idea/compiler.xml b/.idea/compiler.xml
++new file mode 100644
++--- /dev/null	(date 1744996561493)
+++++ b/.idea/compiler.xml	(date 1744996561493)
++@@ -0,0 +1,6 @@
+++<?xml version="1.0" encoding="UTF-8"?>
+++<project version="4">
+++  <component name="CompilerConfiguration">
+++    <bytecodeTargetLevel target="21" />
+++  </component>
+++</project>
++\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15__Changes_.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15__Changes_.xml b/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15__Changes_.xml
+new file mode 100644
+--- /dev/null	(date 1746233448601)
++++ b/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15__Changes_.xml	(date 1746233448601)
+@@ -0,0 +1,4 @@
++<changelist name="Uncommitted_changes_before_Merge_at_18_04_2025_14_15_[Changes]" date="1744996562006" recycled="true" deleted="true">
++  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Merge_at_18_04_2025_14_15_[Changes]/shelved.patch" />
++  <option name="DESCRIPTION" value="Uncommitted changes before Merge at 18/04/2025 14:15 [Changes]" />
++</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_24_04_2025_19_30__Changes_.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_24_04_2025_19_30__Changes_.xml b/.idea/shelf/Uncommitted_changes_before_Update_at_24_04_2025_19_30__Changes_.xml
+new file mode 100644
+--- /dev/null	(date 1746233448601)
++++ b/.idea/shelf/Uncommitted_changes_before_Update_at_24_04_2025_19_30__Changes_.xml	(date 1746233448601)
+@@ -0,0 +1,4 @@
++<changelist name="Uncommitted_changes_before_Update_at_24_04_2025_19_30_[Changes]" date="1745533850145" recycled="false" toDelete="true">
++  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_04_2025_19_30_[Changes]/shelved.patch" />
++  <option name="DESCRIPTION" value="Uncommitted changes before Update at 24/04/2025 19:30 [Changes]" />
++</changelist>
+\ No newline at end of file
+Index: gradle/libs.versions.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[versions]\nagp = \"8.8.0\"\nkotlin = \"2.0.0\"\ncoreKtx = \"1.15.0\"\njunit = \"4.13.2\"\njunitVersion = \"1.2.1\"\nespressoCore = \"3.6.1\"\nlifecycleRuntimeKtx = \"2.8.7\"\nactivityCompose = \"1.10.1\"\ncomposeBom = \"2024.04.01\"\n\n[libraries]\nandroidx-core-ktx = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"coreKtx\" }\njunit = { group = \"junit\", name = \"junit\", version.ref = \"junit\" }\nandroidx-junit = { group = \"androidx.test.ext\", name = \"junit\", version.ref = \"junitVersion\" }\nandroidx-espresso-core = { group = \"androidx.test.espresso\", name = \"espresso-core\", version.ref = \"espressoCore\" }\nandroidx-lifecycle-runtime-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-runtime-ktx\", version.ref = \"lifecycleRuntimeKtx\" }\nandroidx-activity-compose = { group = \"androidx.activity\", name = \"activity-compose\", version.ref = \"activityCompose\" }\nandroidx-compose-bom = { group = \"androidx.compose\", name = \"compose-bom\", version.ref = \"composeBom\" }\nandroidx-ui = { group = \"androidx.compose.ui\", name = \"ui\" }\nandroidx-ui-graphics = { group = \"androidx.compose.ui\", name = \"ui-graphics\" }\nandroidx-ui-tooling = { group = \"androidx.compose.ui\", name = \"ui-tooling\" }\nandroidx-ui-tooling-preview = { group = \"androidx.compose.ui\", name = \"ui-tooling-preview\" }\nandroidx-ui-test-manifest = { group = \"androidx.compose.ui\", name = \"ui-test-manifest\" }\nandroidx-ui-test-junit4 = { group = \"androidx.compose.ui\", name = \"ui-test-junit4\" }\nandroidx-material3 = { group = \"androidx.compose.material3\", name = \"material3\" }\n\n[plugins]\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\nkotlin-android = { id = \"org.jetbrains.kotlin.android\", version.ref = \"kotlin\" }\nkotlin-compose = { id = \"org.jetbrains.kotlin.plugin.compose\", version.ref = \"kotlin\" }\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+--- a/gradle/libs.versions.toml	(revision a27b306fef7d4888f17abd3414af55e99de4fd98)
++++ b/gradle/libs.versions.toml	(date 1746233448603)
+@@ -1,7 +1,7 @@
+ [versions]
+ agp = "8.8.0"
+ kotlin = "2.0.0"
+-coreKtx = "1.15.0"
++coreKtx = "1.16.0"
+ junit = "4.13.2"
+ junitVersion = "1.2.1"
+ espressoCore = "3.6.1"
+@@ -24,6 +24,8 @@
+ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+ androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
++androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.5.4" }
++
+ 
+ [plugins]
+ android-application = { id = "com.android.application", version.ref = "agp" }
+Index: app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt b/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt
+new file mode 100644
+--- /dev/null	(date 1746233448602)
++++ b/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt	(date 1746233448602)
+@@ -0,0 +1,28 @@
++package com.example.flashcardapp.screens
++
++
++import android.os.Bundle
++import androidx.activity.ComponentActivity
++import androidx.activity.compose.setContent
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.material3.MaterialTheme
++import androidx.compose.material3.Text
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++
++class MainActivity : ComponentActivity() {
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        setContent {
++
++                Box(
++                    modifier = Modifier.fillMaxSize(),
++                    contentAlignment = Alignment.Center
++                ) {
++                    Text(text = "Olá Mundo", style = MaterialTheme.typography.headlineMedium)
++                }
++
++        }
++    }
++}
+Index: app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt b/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt
+new file mode 100644
+--- /dev/null	(date 1746233448603)
++++ b/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt	(date 1746233448603)
+@@ -0,0 +1,139 @@
++package com.example.flashcardapp.screens
++
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.*
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.Icons.Default
++import androidx.compose.material.icons.filled.*
++import androidx.compose.material3.*
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.vector.ImageVector
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++
++@Composable
++fun DashboardScreen() {
++    Box(
++        modifier = Modifier
++            .fillMaxSize()
++            .background(Color(0xFF5D2316))
++            .padding(16.dp)
++    ) {
++        Column(
++            modifier = Modifier
++                .fillMaxSize()
++                .padding(horizontal = 24.dp, vertical = 32.dp) //
++        ) {
++            // Cabeçalho
++            Row(
++                modifier = Modifier.fillMaxWidth(),
++                horizontalArrangement = Arrangement.SpaceBetween,
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Text(
++                    text = "FlashcardsApp",
++                    fontSize = 24.sp,
++                    fontWeight = FontWeight.Bold,
++                    color = Color.White
++                )
++                Row(verticalAlignment = Alignment.CenterVertically) {
++                    Icon(
++                        imageVector = Default.Place,
++                        contentDescription = "Local",
++                        tint = Color.Red
++                    )
++                    Text(
++                        text = "sala",
++                        color = Color.White
++                    )
++                    Icon(
++                        imageVector = Default.KeyboardArrowRight,
++                        contentDescription = "Ir",
++                        tint = Color.White
++                    )
++                }
++            }
++
++            Spacer(modifier = Modifier.height(24.dp))
++
++            StatusCard(
++                icon = Default.FlashOn,
++                iconColor = Color.Yellow,
++                value = "0%",
++                label = "Taxa de acertos"
++            )
++            Spacer(modifier = Modifier.height(8.dp))
++
++            StatusCard(
++                icon = Default.Whatshot,
++                iconColor = Color.Red,
++                value = "0",
++                label = "Dias seguidos de estudo"
++            )
++            Spacer(modifier = Modifier.height(8.dp))
++
++            StatusCard(
++                icon = Default.EmojiEvents,
++                iconColor = Color(0xFFFFD700),
++                value = "0",
++                label = "Record de dias"
++            )
++        }
++
++        // FAB
++        FloatingActionButton(
++            onClick = { /* ação ao clicar */ },
++            containerColor = Color(0xFF2E3B00),
++            contentColor = Color.White,
++            modifier = Modifier
++                .align(Alignment.BottomEnd)
++                .padding(16.dp)
++        ) {
++            Icon(Default.Add, contentDescription = "Adicionar")
++        }
++    }
++}
++
++@Composable
++fun StatusCard(icon: ImageVector, iconColor: Color, value: String, label: String) {
++    Card(
++        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A2F1B)),
++        shape = RoundedCornerShape(8.dp),
++        modifier = Modifier
++            .fillMaxWidth()
++            .height(60.dp),
++        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
++    ) {
++        Row(
++            verticalAlignment = Alignment.CenterVertically,
++            modifier = Modifier.padding(horizontal = 16.dp)
++        ) {
++            Icon(
++                imageVector = icon,
++                contentDescription = null,
++                tint = iconColor,
++                modifier = Modifier.size(24.dp)
++            )
++            Spacer(modifier = Modifier.width(12.dp))
++            Column {
++                Text(
++                    text = value,
++                    fontWeight = FontWeight.Bold,
++                    color = Color.Yellow,
++                    fontSize = 16.sp
++                )
++                Text(
++                    text = label,
++                    color = Color.White,
++                    fontSize = 12.sp
++                )
++            }
++        }
++    }
++}
++
