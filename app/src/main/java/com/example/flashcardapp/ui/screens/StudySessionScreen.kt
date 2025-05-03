@@ -1,15 +1,45 @@
 package com.example.flashcardapp.ui.screens
 
-
-import androidx.compose.foundation.layout.*
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -27,8 +57,8 @@ fun StudySessionScreen(
 ) {
     val studySessionState by viewModel.studySessionUiState.collectAsState()
     val locationsState by viewModel.locationsUiState.collectAsState()
+    val context = LocalContext.current
 
-    // Iniciar a sessão de estudo quando a tela é carregada
     LaunchedEffect(key1 = deckId, key2 = locationBased) {
         if (locationBased && locationsState.currentLocation != null) {
             viewModel.startLocationBasedStudy(locationsState.currentLocation!!.locationId)
@@ -37,18 +67,35 @@ fun StudySessionScreen(
         }
     }
 
+    var canNavigateBack by remember { mutableStateOf(true) }
+
+    BackHandler(enabled = !canNavigateBack) {
+        Toast.makeText(context, "Você ainda não avaliou. Diga o que achou dessa pergunta.", Toast.LENGTH_SHORT).show()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    if (locationBased && locationsState.currentLocation != null) {
-                        Text("Estudo: ${locationsState.currentLocation!!.name}")
-                    } else {
-                        Text("Sessão de Estudo")
-                    }
+                    Text(
+                        if (locationBased && locationsState.currentLocation != null)
+                            "Estudo: ${locationsState.currentLocation!!.name}"
+                        else
+                            "Sessão de Estudo"
+                    )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        if (canNavigateBack) {
+                            navController.popBackStack()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Você ainda não avaliou. Diga o que achou dessa pergunta.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
                     }
                 },
@@ -70,23 +117,19 @@ fun StudySessionScreen(
                 .padding(paddingValues)
         ) {
             when {
-                studySessionState.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-
-                studySessionState.isCompleted -> {
-                    StudySessionCompleted(onBackClick = { navController.popBackStack() })
-                }
-
-                studySessionState.currentFlashcard != null -> {
-                    FlashcardStudyContent(
-                        flashcard = studySessionState.currentFlashcard!!,
-                        isAnswerRevealed = studySessionState.isAnswerRevealed,
-                        remainingCards = studySessionState.remainingCards,
-                        onRevealAnswer = { viewModel.revealAnswer() },
-                        onRateCard = { rating -> viewModel.rateCard(rating) }
-                    )
-                }
+                studySessionState.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                studySessionState.isCompleted -> StudySessionCompleted(onBackClick = { navController.popBackStack() })
+                studySessionState.currentFlashcard != null -> FlashcardStudyContent(
+                    flashcard = studySessionState.currentFlashcard!!,
+                    isAnswerRevealed = studySessionState.isAnswerRevealed,
+                    remainingCards = studySessionState.remainingCards,
+                    onRevealAnswer = { viewModel.revealAnswer() },
+                    onRateCard = {
+                        viewModel.rateCard(it)
+                        canNavigateBack = true
+                    },
+                    setCanNavigateBack = { canNavigateBack = it }
+                )
             }
         }
     }
@@ -98,15 +141,23 @@ fun FlashcardStudyContent(
     isAnswerRevealed: Boolean,
     remainingCards: Int,
     onRevealAnswer: () -> Unit,
-    onRateCard: (Int) -> Unit
+    onRateCard: (Int) -> Unit,
+    setCanNavigateBack: (Boolean) -> Unit
 ) {
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+    var userInput by remember { mutableStateOf("") }
+    var hasCheckedInput by remember { mutableStateOf(false) }
+
+    val options = remember(flashcard.options) {
+        flashcard.options?.split("|")?.shuffled() ?: emptyList()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Progresso
         LinearProgressIndicator(
             progress = { 1f - (remainingCards.toFloat() / (remainingCards + 1)) },
             modifier = Modifier
@@ -114,7 +165,6 @@ fun FlashcardStudyContent(
                 .padding(bottom = 16.dp)
         )
 
-        // Cartão
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,44 +178,137 @@ fun FlashcardStudyContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Pergunta
-                Text(
-                    text = flashcard.question,
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+                when (flashcard.type) {
+                    FlashcardType.CLOZE -> {
+                        val full = flashcard.fullText ?: ""
+                        val hidden = flashcard.answer
+                        val masked = full.replace(hidden, "...")
 
-                // Resposta (se estiver revelada)
-                if (isAnswerRevealed) {
-                    Divider(modifier = Modifier.padding(vertical = 16.dp))
+                        Text(
+                            text = if (isAnswerRevealed) full else masked,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
 
-                    Text(
-                        text = "Resposta:",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                        if (!isAnswerRevealed) {
+                            Button(
+                                onClick = { onRevealAnswer() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Revelar resposta")
+                            }
+                        }
+                    }
 
-                    when (flashcard.type) {
-                        FlashcardType.QUIZ -> {
+                    FlashcardType.QUIZ -> {
+                        Text(
+                            text = flashcard.question,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+
+                        options.forEach { option ->
+                            val isCorrect = option == flashcard.answer
+                            val isSelected = option == selectedOption
+
+                            val bgColor = when {
+                                selectedOption != null && isCorrect -> Color(0xFFB9F6CA)
+                                selectedOption != null && isSelected && !isCorrect -> Color(0xFFFFCDD2)
+                                else -> MaterialTheme.colorScheme.surface
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (selectedOption == null) {
+                                        selectedOption = option
+                                        onRevealAnswer()
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = bgColor),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Text(option)
+                            }
+                        }
+                    }
+
+                    FlashcardType.INPUT -> {
+                        Text(
+                            text = flashcard.question,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+
+                        if (!isAnswerRevealed) {
+                            OutlinedTextField(
+                                value = userInput,
+                                onValueChange = { userInput = it },
+                                label = { Text("Sua resposta") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = {
+                                    hasCheckedInput = true
+                                    onRevealAnswer()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = userInput.isNotBlank()
+                            ) {
+                                Text("Verificar")
+                            }
+                        } else {
+                            val isCorrect = userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
+                            val feedbackColor = if (isCorrect) Color(0xFFB9F6CA) else Color(0xFFFFCDD2)
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             Text(
-                                text = flashcard.answer,
+                                text = if (isCorrect) "✅ Você acertou!" else "❌ Você errou!",
+                                color = feedbackColor,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Resposta correta: ${flashcard.answer}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center
                             )
                         }
-                        FlashcardType.CLOZE -> {
-                            Text(
-                                text = flashcard.fullText ?: "",
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                        else -> {
+                    }
+
+                    FlashcardType.BASIC -> {
+                        Text(
+                            text = flashcard.question,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+
+                        if (!isAnswerRevealed) {
+                            Button(
+                                onClick = { onRevealAnswer() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Revelar resposta")
+                            }
+                        } else {
+                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+                            Text("Resposta:", style = MaterialTheme.typography.titleSmall)
                             Text(
                                 text = flashcard.answer,
                                 style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 8.dp)
                             )
                         }
                     }
@@ -175,17 +318,9 @@ fun FlashcardStudyContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botões de ação
-        if (!isAnswerRevealed) {
-            Button(
-                onClick = onRevealAnswer,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("Mostrar Resposta")
-            }
-        } else {
+        if (isAnswerRevealed && (flashcard.type != FlashcardType.INPUT || hasCheckedInput)) {
+            setCanNavigateBack(false)
+
             Text(
                 text = "Como você se saiu?",
                 style = MaterialTheme.typography.titleSmall,
@@ -198,33 +333,18 @@ fun FlashcardStudyContent(
             ) {
                 Button(
                     onClick = { onRateCard(0) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                ) {
-                    Text("Difícil")
-                }
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) { Text("Difícil") }
 
                 Button(
                     onClick = { onRateCard(1) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                ) {
-                    Text("Bom")
-                }
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) { Text("Bom") }
 
                 Button(
                     onClick = { onRateCard(2) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                ) {
-                    Text("Fácil")
-                }
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                ) { Text("Fácil") }
             }
         }
     }
@@ -239,22 +359,14 @@ fun StudySessionCompleted(onBackClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Sessão Concluída!",
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center
-        )
-
+        Text("Sessão Concluída!", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
-
         Text(
-            text = "Parabéns! Você completou todos os cartões disponíveis para revisão.",
+            "Parabéns! Você completou todos os cartões disponíveis para revisão.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
-
         Spacer(modifier = Modifier.height(32.dp))
-
         Button(
             onClick = onBackClick,
             modifier = Modifier
