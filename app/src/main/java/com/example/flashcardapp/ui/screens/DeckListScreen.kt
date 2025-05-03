@@ -11,13 +11,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
+import kotlin.math.roundToInt
 
 // Definindo as cores da nova paleta
 private val GreenPrimary = Color(0xFF4CAF50) // Verde principal
@@ -71,21 +76,73 @@ fun DeckListScreen(
     viewModel: FlashcardAppViewModel
 ) {
     val deckListState by viewModel.deckListUiState.collectAsState()
+    val userStatsState by viewModel.userStatsUiState.collectAsState()
     var showCreateDeckDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = GreenPale,
         topBar = {
             TopAppBar(
-                title = { Text("Flashcards", color = GrayDark) },
+                title = { Text("", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = GreenPrimary,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
+                navigationIcon = {
+                    Row(
+                        modifier = Modifier.padding(start = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Ícone de sequência de dias (chama)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocalFireDepartment,
+                                contentDescription = "Dias consecutivos",
+                                tint = AmberAccent
+                            )
+                            Text(
+                                text = "${userStatsState.streakDays}",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        // Ícone de taxa de acerto
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = GreenDark,
+                                        shape = CircleShape
+                                    )
+                                    .padding(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Taxa de acerto",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Text(
+                                text = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = { navController.navigate("stats") }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Statistics", tint = Color.White)
+                        Icon(Icons.Default.BarChart, contentDescription = "Statistics", tint = Color.White)
                     }
                     IconButton(onClick = { navController.navigate("locations") }) {
                         Icon(Icons.Default.LocationOn, contentDescription = "Locations", tint = Color.White)
