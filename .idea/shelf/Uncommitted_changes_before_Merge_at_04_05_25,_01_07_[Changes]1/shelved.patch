@@ -1,0 +1,72 @@
+Index: app/src/main/java/com/example/flashcardapp/ui/viewmodel/FlashCardAppViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.ui.viewmodel\n\n\nimport android.app.Application\nimport androidx.lifecycle.AndroidViewModel\nimport androidx.lifecycle.viewModelScope\nimport com.example.flashcardapp.data.entities.Deck\nimport com.example.flashcardapp.data.entities.Flashcard\nimport com.example.flashcardapp.data.entities.StudyLocation\nimport com.example.flashcardapp.data.repository.FlashcardRepository\nimport com.example.flashcardapp.services.LocationService\nimport com.example.flashcardapp.ui.model.*\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.first\nimport kotlinx.coroutines.launch\n\n/**\n * ViewModel principal do aplicativo\n */\nclass FlashcardAppViewModel(application: Application) : AndroidViewModel(application) {\n    private val repository = FlashcardRepository(application)\n    private val locationService = LocationService(application)\n\n    // Estado para estatísticas do usuário\n    private val _userStatsUiState = MutableStateFlow(UserStatsUiState())\n    val userStatsUiState: StateFlow<UserStatsUiState> = _userStatsUiState.asStateFlow()\n\n    // Estado para listagem de baralhos\n    private val _deckListUiState = MutableStateFlow(DeckListUiState())\n    val deckListUiState: StateFlow<DeckListUiState> = _deckListUiState.asStateFlow()\n\n    // Estado para sessão de estudo\n    private val _studySessionUiState = MutableStateFlow(StudySessionUiState())\n    val studySessionUiState: StateFlow<StudySessionUiState> = _studySessionUiState.asStateFlow()\n\n    // Estado para localizações\n    private val _locationsUiState = MutableStateFlow(LocationsUiState())\n    val locationsUiState: StateFlow<LocationsUiState> = _locationsUiState.asStateFlow()\n\n    // Flashcards para estudar na sessão atual\n    private var studySessionCards = mutableListOf<Flashcard>()\n\n    init {\n        viewModelScope.launch {\n            // Inicializa estatísticas do usuário se necessário\n            repository.initializeUserStats()\n\n            // Carrega estatísticas do usuário\n            repository.userStats.collect { stats ->\n                _userStatsUiState.value = UserStatsUiState(\n                    correctAnswerRate = if (stats.totalAnswers > 0)\n                        stats.correctAnswers.toFloat() / stats.totalAnswers\n                    else 0f,\n                    streakDays = stats.streakDays,\n                    maxStreakDays = stats.maxStreakDays,\n                    totalStudyDays = stats.totalStudyDays,\n                    isLoading = false\n                )\n            }\n        }\n\n        // Carrega lista de baralhos com informações de contagem\n        viewModelScope.launch {\n            val decksFlow = repository.getAllDecks()\n            decksFlow.collect { deckList ->\n                val decksWithStats = mutableListOf<DeckWithStats>()\n\n                for (deck in deckList) {\n                    val cardCount = repository.getCardCountForDeck(deck.deckId).first()\n                    val dueCount = repository.getDueCardCountForDeck(deck.deckId).first()\n\n                    decksWithStats.add(\n                        DeckWithStats(\n                            deck = deck,\n                            cardCount = cardCount,\n                            dueCardCount = dueCount\n                        )\n                    )\n                }\n\n                _deckListUiState.value = DeckListUiState(\n                    decks = decksWithStats,\n                    isLoading = false\n                )\n            }\n        }\n\n        // Carrega localizações\n        viewModelScope.launch {\n            repository.getAllLocations().collect { locationList ->\n                _locationsUiState.value = LocationsUiState(\n                    locations = locationList,\n                    canAddMore = locationList.size < 7,\n                    isLoading = false\n                )\n            }\n        }\n    }\n\n    // Funções para gerenciamento de baralhos\n\n    fun createDeck(name: String, description: String? = null) {\n        viewModelScope.launch {\n            repository.createDeck(name, description)\n        }\n    }\n\n    fun deleteDeck(deck: Deck) {\n        viewModelScope.launch {\n            repository.deleteDeck(deck)\n        }\n    }\n\n    // Funções para gerenciamento de flashcards\n\n    fun createBasicFlashcard(deckId: Long, question: String, answer: String) {\n        viewModelScope.launch {\n            repository.createBasicFlashcard(deckId, question, answer)\n        }\n    }\n\n    fun createQuizFlashcard(deckId: Long, question: String, answer: String, options: List<String>) {\n        viewModelScope.launch {\n            repository.createQuizFlashcard(deckId, question, answer, options)\n        }\n    }\n\n    fun createClozeFlashcard(deckId: Long, fullText: String, hiddenText: String) {\n        viewModelScope.launch {\n            repository.createClozeFlashcard(deckId, fullText, hiddenText)\n        }\n    }\n\n    fun createInputFlashcard(deckId: Long, question: String, answer: String) {\n        viewModelScope.launch {\n            repository.createInputFlashcard(deckId, question, answer)\n        }\n    }\n\n\n    // Adicionado\n    suspend fun getAllFlashcardsForDeck(deckId: Long): List<Flashcard> {\n        return repository.getFlashcardsByDeck(deckId).first()\n    }\n\n    fun deleteFlashcard(flashcard: Flashcard) {\n        viewModelScope.launch {\n            repository.deleteFlashcard(flashcard)\n        }\n    }\n\n\n    // Funções para sessão de estudo\n\n    fun startStudySession(deckId: Long? = null) {\n        viewModelScope.launch {\n            _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)\n\n            studySessionCards = if (deckId != null) {\n                repository.getDueFlashcardsForDeck(deckId).toMutableList()\n            } else {\n                repository.getAllDueFlashcards().toMutableList()\n            }\n\n            if (studySessionCards.isNotEmpty()) {\n                _studySessionUiState.value = StudySessionUiState(\n                    currentFlashcard = studySessionCards.first(),\n                    remainingCards = studySessionCards.size,\n                    isLoading = false\n                )\n            } else {\n                _studySessionUiState.value = StudySessionUiState(\n                    isLoading = false,\n                    isCompleted = true\n                )\n            }\n        }\n    }\n\n    fun revealAnswer() {\n        _studySessionUiState.value = _studySessionUiState.value.copy(\n            isAnswerRevealed = true\n        )\n    }\n\n    fun rateCard(rating: Int) {\n        val currentCard = _studySessionUiState.value.currentFlashcard ?: return\n\n        viewModelScope.launch {\n            repository.reviewFlashcard(currentCard.flashcardId, rating)\n\n            // Remove o cartão atual e avança\n            if (studySessionCards.isNotEmpty()) {\n                studySessionCards.removeAt(0)\n            }\n\n            if (studySessionCards.isNotEmpty()) {\n                _studySessionUiState.value = StudySessionUiState(\n                    currentFlashcard = studySessionCards.first(),\n                    remainingCards = studySessionCards.size,\n                    isLoading = false\n                )\n            } else {\n                _studySessionUiState.value = StudySessionUiState(\n                    isLoading = false,\n                    isCompleted = true\n                )\n            }\n        }\n    }\n\n    // Funções para localizações\n\n    fun addStudyLocation(name: String, latitude: Double, longitude: Double) {\n        viewModelScope.launch {\n            repository.addLocation(name, latitude, longitude)\n        }\n    }\n\n    fun deleteLocation(location: StudyLocation) {\n        viewModelScope.launch {\n            repository.deleteLocation(location)\n        }\n    }\n\n    fun updateCurrentLocation(latitude: Double, longitude: Double) {\n        viewModelScope.launch {\n            val nearest = repository.getNearestLocation(latitude, longitude)\n            _locationsUiState.value = _locationsUiState.value.copy(\n                currentLocation = nearest\n            )\n            _studySessionUiState.value = _studySessionUiState.value.copy(\n                currentLocation = nearest\n            )\n        }\n    }\n\n    fun startLocationBasedStudy(locationId: Long) {\n        viewModelScope.launch {\n            _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)\n\n            studySessionCards = repository.getFlashcardsForNewLocation(locationId).toMutableList()\n\n            if (studySessionCards.isNotEmpty()) {\n                _studySessionUiState.value = StudySessionUiState(\n                    currentFlashcard = studySessionCards.first(),\n                    remainingCards = studySessionCards.size,\n                    isLoading = false\n                )\n            } else {\n                _studySessionUiState.value = StudySessionUiState(\n                    isLoading = false,\n                    isCompleted = true\n                )\n            }\n        }\n    }\n\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/ui/viewmodel/FlashCardAppViewModel.kt b/app/src/main/java/com/example/flashcardapp/ui/viewmodel/FlashCardAppViewModel.kt
+--- a/app/src/main/java/com/example/flashcardapp/ui/viewmodel/FlashCardAppViewModel.kt	(revision 2106ae2499dd9697016f084c93771817ba6c116e)
++++ b/app/src/main/java/com/example/flashcardapp/ui/viewmodel/FlashCardAppViewModel.kt	(date 1746331631206)
+@@ -1,6 +1,5 @@
+ package com.example.flashcardapp.ui.viewmodel
+ 
+-
+ import android.app.Application
+ import androidx.lifecycle.AndroidViewModel
+ import androidx.lifecycle.viewModelScope
+@@ -139,7 +138,6 @@
+         }
+     }
+ 
+-
+     // Adicionado
+     suspend fun getAllFlashcardsForDeck(deckId: Long): List<Flashcard> {
+         return repository.getFlashcardsByDeck(deckId).first()
+@@ -151,7 +149,6 @@
+         }
+     }
+ 
+-
+     // Funções para sessão de estudo
+ 
+     fun startStudySession(deckId: Long? = null) {
+@@ -258,5 +255,36 @@
+         }
+     }
+ 
++    // NOVA FUNÇÃO ADICIONADA
++    suspend fun previewNextIntervals(): Map<String, String> {
++        val currentCard = _studySessionUiState.value.currentFlashcard ?: return emptyMap()
++        val studyInfo = repository.getStudyInfo(currentCard.flashcardId) ?: return emptyMap()
++
++        fun computeNext(interval: Long): String {
++            val hours = interval / (1000 * 60 * 60)
++            val days = hours / 24
++            return when {
++                days >= 1 -> "$days dia(s)"
++                else -> "$hours hora(s)"
++            }
++        }
+ 
+-}
+\ No newline at end of file
++        val map = mutableMapOf<String, String>()
++        val now = System.currentTimeMillis()
++        val base = studyInfo.copy()
++
++        // Difícil (rating 1)
++        val diff = repository.getSpacedRepetition().updateStudyInfo(base.copy(), 1)
++        map["Difícil"] = computeNext(diff.nextReviewDate - now)
++
++        // Bom (rating 2)
++        val good = repository.getSpacedRepetition().updateStudyInfo(base.copy(), 2)
++        map["Bom"] = computeNext(good.nextReviewDate - now)
++
++        // Fácil (rating 3)
++        val easy = repository.getSpacedRepetition().updateStudyInfo(base.copy(), 3)
++        map["Fácil"] = computeNext(easy.nextReviewDate - now)
++
++        return map
++    }
++}
