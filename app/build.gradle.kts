@@ -85,4 +85,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
 
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.33.2-alpha")
+
+
 }

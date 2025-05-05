@@ -9,7 +9,11 @@ import com.example.flashcardapp.data.entities.Flashcard
 import com.example.flashcardapp.data.entities.StudyLocation
 import com.example.flashcardapp.data.repository.FlashcardRepository
 import com.example.flashcardapp.services.LocationService
-import com.example.flashcardapp.ui.model.*
+import com.example.flashcardapp.ui.model.DeckListUiState
+import com.example.flashcardapp.ui.model.DeckWithStats
+import com.example.flashcardapp.ui.model.LocationsUiState
+import com.example.flashcardapp.ui.model.StudySessionUiState
+import com.example.flashcardapp.ui.model.UserStatsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -257,6 +261,33 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+    fun refreshDeckList() {
+        viewModelScope.launch {
+            val decksFlow = repository.getAllDecks()
+            decksFlow.collect { deckList ->
+                val decksWithStats = mutableListOf<DeckWithStats>()
+
+                for (deck in deckList) {
+                    val cardCount = repository.getCardCountForDeck(deck.deckId).first()
+                    val dueCount = repository.getDueCardCountForDeck(deck.deckId).first()
+
+                    decksWithStats.add(
+                        DeckWithStats(
+                            deck = deck,
+                            cardCount = cardCount,
+                            dueCardCount = dueCount
+                        )
+                    )
+                }
+
+                _deckListUiState.value = DeckListUiState(
+                    decks = decksWithStats,
+                    isLoading = false
+                )
+            }
+        }
+    }
+
 
 
 }

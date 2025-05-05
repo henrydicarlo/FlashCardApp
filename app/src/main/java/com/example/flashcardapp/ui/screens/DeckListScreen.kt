@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -160,44 +164,58 @@ fun DeckListScreen(
             }
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(GreenPale)
-                .padding(paddingValues)
+        val isRefreshing = remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
+
+        SwipeRefresh(
+            state = SwipeRefreshState(isRefreshing.value),
+            onRefresh = {
+                isRefreshing.value = true
+                coroutineScope.launch {
+                    viewModel.refreshDeckList()
+                    isRefreshing.value = false
+                }
+            }
         ) {
-            if (deckListState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = GreenDark
-                )
-            } else if (deckListState.decks.isEmpty()) {
-                Text(
-                    text = "Nenhum baralho encontrado. Crie um novo!",
-                    color = GrayDark,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(deckListState.decks) { deckWithStats ->
-                        DeckCard(
-                            deckWithStats = deckWithStats,
-                            onClick = { navController.navigate("deck/${deckWithStats.deck.deckId}") },
-                            onStudyClick = { navController.navigate("study/${deckWithStats.deck.deckId}") }
-                        )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(GreenPale)
+                    .padding(paddingValues)
+            ) {
+                if (deckListState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = GreenDark
+                    )
+                } else if (deckListState.decks.isEmpty()) {
+                    Text(
+                        text = "Nenhum baralho encontrado. Crie um novo!",
+                        color = GrayDark,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(deckListState.decks) { deckWithStats ->
+                            DeckCard(
+                                deckWithStats = deckWithStats,
+                                onClick = { navController.navigate("deck/${deckWithStats.deck.deckId}") },
+                                onStudyClick = { navController.navigate("study/${deckWithStats.deck.deckId}") }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    if (showCreateDeckDialog) {
+        if (showCreateDeckDialog) {
         CreateDeckDialog(
             onDismiss = { showCreateDeckDialog = false },
             onCreate = { name, description ->
@@ -349,3 +367,4 @@ fun CreateDeckDialog(
         }
     )
 }
+
