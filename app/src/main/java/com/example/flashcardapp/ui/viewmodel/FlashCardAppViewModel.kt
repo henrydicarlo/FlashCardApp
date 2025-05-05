@@ -45,11 +45,6 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
     // Flashcards para estudar na sessão atual
     private var studySessionCards = mutableListOf<Flashcard>()
 
-    // Estado para acompanhar o progresso da sincronização
-    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
-    val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
-
-
     init {
         viewModelScope.launch {
             // Inicializa estatísticas do usuário se necessário
@@ -268,37 +263,23 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
 
     private val syncService = SyncService(
         context = application,
+        database = FlashcardAppDatabase.getDatabase(application)
+    )
+
+    /*private val syncService = SyncService(
+        context = application,
         database = databaseBuilder(
             application,
             FlashcardAppDatabase::class.java,
-            "app_database"
+            "flashcard_app_database"
         ).build()
-    )
+    )*/
 
-    // Sincronização completa (enviar e receber dados)
+
     fun sync() {
         viewModelScope.launch {
-            _syncState.value = SyncState.Loading
-            val result = syncService.syncData()
-            _syncState.value = if (result) SyncState.Success else SyncState.Error
+            syncService.syncData()
         }
     }
-
-    // Apenas baixar dados do servidor
-    fun downloadData() {
-        viewModelScope.launch {
-            _syncState.value = SyncState.Loading
-            val result = syncService.downloadAndSaveServerData()
-            _syncState.value = if (result) SyncState.Success else SyncState.Error
-        }
-    }
-}
-
-// Estados possíveis da sincronização
-sealed class SyncState {
-    object Idle : SyncState()
-    object Loading : SyncState()
-    object Success : SyncState()
-    object Error : SyncState()
 }
 

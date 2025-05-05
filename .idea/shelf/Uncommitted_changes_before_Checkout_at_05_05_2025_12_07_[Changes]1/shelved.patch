@@ -1,0 +1,298 @@
+Index: app/src/main/java/com/example/flashcardapp/services/SyncService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.services\r\n\r\nimport io.ktor.client.plugins.contentnegotiation.*\r\nimport io.ktor.client.request.*\r\nimport io.ktor.http.*\r\nimport io.ktor.serialization.kotlinx.json.*\r\nimport kotlinx.serialization.json.Json\r\nimport kotlinx.coroutines.Dispatchers\r\nimport kotlinx.coroutines.withContext\r\nimport android.content.Context\r\nimport android.util.Log\r\nimport com.example.flashcardapp.data.database.FlashcardAppDatabase\r\nimport com.example.flashcardapp.ui.model.SyncData\r\nimport io.ktor.client.HttpClient\r\nimport io.ktor.client.call.body\r\n\r\nclass SyncService(\r\n    private val context: Context,\r\n    private val database: FlashcardAppDatabase\r\n) {\r\n    private val TAG = \"SyncService\"\r\n    private val client = HttpClient {\r\n        install(ContentNegotiation) {\r\n            json(Json {\r\n                prettyPrint = true\r\n                ignoreUnknownKeys = true\r\n            })\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Sincroniza dados entre o aplicativo e o servidor\r\n     *\r\n     * @return true se a sincronização foi bem-sucedida, false caso contrário\r\n     */\r\n    suspend fun syncData(): Boolean = withContext(Dispatchers.IO) {\r\n        try {\r\n            // Coleta os dados locais\r\n            val syncData = SyncData(\r\n                decks = database.deckDao().getAll(),\r\n                flashcards = database.flashcardDao().getAll(),\r\n                studyInfos = database.studyInfoDao().getAll(),\r\n                locations = database.locationDao().getAll(),\r\n                userStats = database.userStatsDao().getAll()\r\n            )\r\n\r\n            // Envia dados para o servidor\r\n            val response = client.post(\"http://localhost:8080/api/sync\") {\r\n                contentType(ContentType.Application.Json)\r\n                setBody(syncData)\r\n            }\r\n\r\n            if (response.status != HttpStatusCode.OK) {\r\n                Log.e(TAG, \"Erro ao enviar dados: ${response.status}\")\r\n                return@withContext false\r\n            }\r\n\r\n            // Baixa dados do servidor\r\n            return@withContext downloadAndSaveServerData()\r\n\r\n        } catch (e: Exception) {\r\n            // Handle error (log or notify user)\r\n            Log.e(TAG, \"Erro durante sincronização\", e)\r\n            return@withContext false\r\n        } finally {\r\n            client.close()\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Baixa apenas os dados do servidor e salva no banco de dados local\r\n     * Esta função pode ser chamada independentemente para apenas baixar dados\r\n     *\r\n     * @return true se o download foi bem-sucedido, false caso contrário\r\n     */\r\n    suspend fun downloadAndSaveServerData(): Boolean = withContext(Dispatchers.IO) {\r\n        val client = HttpClient {\r\n            install(ContentNegotiation) {\r\n                json(Json {\r\n                    prettyPrint = true\r\n                    ignoreUnknownKeys = true\r\n                })\r\n            }\r\n        }\r\n\r\n        try {\r\n            // Busca dados do servidor\r\n            Log.d(TAG, \"Baixando dados do servidor...\")\r\n            val serverData = client.get(\"http://localhost:8080/api/sync\").body<SyncData>()\r\n\r\n            Log.d(TAG, \"Dados recebidos: ${serverData.decks.size} decks, \" +\r\n                    \"${serverData.flashcards.size} flashcards, \" +\r\n                    \"${serverData.studyInfos.size} estudos, \" +\r\n                    \"${serverData.locations.size} localizações, \" +\r\n                    \"${serverData.userStats.size} estatísticas\")\r\n\r\n            // Atualiza o banco do aplicativo\r\n            database.runInTransaction {\r\n                try {\r\n                    // Clear existing data\r\n                    database.deckDao().deleteAll()\r\n                    database.flashcardDao().deleteAll()\r\n                    database.studyInfoDao().deleteAll()\r\n                    database.locationDao().deleteAll()\r\n                    database.userStatsDao().deleteAll()\r\n\r\n                    // Insere todos os dados recebidos do servidor\r\n                    database.deckDao().insertAll(serverData.decks)\r\n                    database.flashcardDao().insertAll(serverData.flashcards)\r\n                    database.studyInfoDao().insertAll(serverData.studyInfos)\r\n                    database.locationDao().insertAll(serverData.locations)\r\n                    database.userStatsDao().insertAll(serverData.userStats)\r\n\r\n                    Log.d(TAG, \"Banco de dados local atualizado com sucesso\")\r\n                } catch (e: Exception) {\r\n                    Log.e(TAG, \"Erro ao salvar dados no banco local\", e)\r\n                    throw e // Relanço a exceção para reverter a transação\r\n                }\r\n            }\r\n\r\n            return@withContext true\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Erro ao baixar ou salvar dados\", e)\r\n            return@withContext false\r\n        } finally {\r\n            client.close()\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/services/SyncService.kt b/app/src/main/java/com/example/flashcardapp/services/SyncService.kt
+--- a/app/src/main/java/com/example/flashcardapp/services/SyncService.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/services/SyncService.kt	(date 1746456585820)
+@@ -10,6 +10,7 @@
+ import android.content.Context
+ import android.util.Log
+ import com.example.flashcardapp.data.database.FlashcardAppDatabase
++import com.example.flashcardapp.data.entities.Flashcard
+ import com.example.flashcardapp.ui.model.SyncData
+ import io.ktor.client.HttpClient
+ import io.ktor.client.call.body
+@@ -45,7 +46,7 @@
+             )
+ 
+             // Envia dados para o servidor
+-            val response = client.post("http://localhost:8080/api/sync") {
++            val response = client.post("http://10.0.2.2:8080/api/sync") {
+                 contentType(ContentType.Application.Json)
+                 setBody(syncData)
+             }
+@@ -73,6 +74,66 @@
+      *
+      * @return true se o download foi bem-sucedido, false caso contrário
+      */
++
++    suspend fun downloadAndSaveServerData(): Boolean = withContext(Dispatchers.IO) {
++        val client = HttpClient {
++            install(ContentNegotiation) {
++                json(Json {
++                    prettyPrint = true
++                    ignoreUnknownKeys = true
++                })
++            }
++        }
++
++        try {
++            // Busca dados do servidor - CORRIGIR A URL PARA O ENDPOINT CORRETO
++            Log.d(TAG, "Baixando dados do servidor...")
++
++            // Obter flashcards
++            val flashcards = client.get("http://10.0.2.2:8080/flashcards").body<List<Flashcard>>()
++            Log.d(TAG, "Flashcards recebidos: ${flashcards.size}")
++
++            // Como sua API atual só tem endpoint para flashcards, você precisa adaptar os dados
++            val syncData = SyncData(
++                decks = emptyList(), // Sua API atual não tem endpoint para decks
++                flashcards = flashcards,
++                studyInfos = emptyList(), // Sua API atual não tem endpoint para studyInfos
++                locations = emptyList(), // Sua API atual não tem endpoint para locations
++                userStats = emptyList() // Sua API atual não tem endpoint para userStats
++            )
++
++            // Atualiza o banco do aplicativo
++            database.runInTransaction {
++                try {
++                    // Clear existing data
++                    database.flashcardDao().deleteAll()
++
++                    // Não limpar outras tabelas se você não tem dados para elas
++                    // database.deckDao().deleteAll()
++                    // database.studyInfoDao().deleteAll()
++                    // database.locationDao().deleteAll()
++                    // database.userStatsDao().deleteAll()
++
++                    // Insere os flashcards recebidos do servidor
++                    database.flashcardDao().insertAll(syncData.flashcards)
++
++                    Log.d(TAG, "Banco de dados local atualizado com sucesso")
++                } catch (e: Exception) {
++                    Log.e(TAG, "Erro ao salvar dados no banco local", e)
++                    throw e
++                }
++            }
++
++            return@withContext true
++        } catch (e: Exception) {
++            Log.e(TAG, "Erro ao baixar ou salvar dados", e)
++            return@withContext false
++        } finally {
++            client.close()
++        }
++    }
++
++    /*
+     suspend fun downloadAndSaveServerData(): Boolean = withContext(Dispatchers.IO) {
+         val client = HttpClient {
+             install(ContentNegotiation) {
+@@ -86,7 +147,7 @@
+         try {
+             // Busca dados do servidor
+             Log.d(TAG, "Baixando dados do servidor...")
+-            val serverData = client.get("http://localhost:8080/api/sync").body<SyncData>()
++            val serverData = client.get("http://localhost:8080/flashcards").body<SyncData>()
+ 
+             Log.d(TAG, "Dados recebidos: ${serverData.decks.size} decks, " +
+                     "${serverData.flashcards.size} flashcards, " +
+@@ -125,5 +186,5 @@
+         } finally {
+             client.close()
+         }
+-    }
++    } */
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/flashcardapp/data/entities/FlashcardType.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.entities\r\n\r\n/**\r\n * Enum para tipos de flashcards\r\n */\r\nenum class FlashcardType {\r\n    BASIC, // Frente e verso simples\r\n    QUIZ, // Múltipla escolha\r\n    CLOZE, // Omissão de palavras\r\n    INPUT // Digite a resposta\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/entities/FlashcardType.kt b/app/src/main/java/com/example/flashcardapp/data/entities/FlashcardType.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/entities/FlashcardType.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/entities/FlashcardType.kt	(date 1746454743214)
+@@ -1,8 +1,11 @@
+ package com.example.flashcardapp.data.entities
+ 
++import kotlinx.serialization.Serializable
++
+ /**
+  * Enum para tipos de flashcards
+  */
++@Serializable
+ enum class FlashcardType {
+     BASIC, // Frente e verso simples
+     QUIZ, // Múltipla escolha
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.android.application)\r\n    alias(libs.plugins.kotlin.android)\r\n    alias(libs.plugins.kotlin.compose)\r\n    id(\"kotlin-kapt\")\r\n    id(\"com.google.android.libraries.mapsplatform.secrets-gradle-plugin\")\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.example.flashcardapp\"\r\n    compileSdk = 35\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.flashcardapp\"\r\n        minSdk = 26\r\n        targetSdk = 35\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_11\r\n        targetCompatibility = JavaVersion.VERSION_11\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"11\"\r\n    }\r\n    buildFeatures {\r\n        compose = true\r\n    }\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.lifecycle.runtime.ktx)\r\n    implementation(libs.androidx.activity.compose)\r\n    implementation(platform(libs.androidx.compose.bom))\r\n    implementation(libs.androidx.ui)\r\n    implementation(libs.androidx.ui.graphics)\r\n    implementation(libs.androidx.ui.tooling.preview)\r\n    implementation(libs.androidx.material3)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n    androidTestImplementation(platform(libs.androidx.compose.bom))\r\n    androidTestImplementation(libs.androidx.ui.test.junit4)\r\n    debugImplementation(libs.androidx.ui.tooling)\r\n    debugImplementation(libs.androidx.ui.test.manifest)\r\n    implementation(libs.androidx.material.icons.extended)\r\n\r\n\r\n    // ViewModel and LiveData\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0\")\r\n    implementation(\"androidx.lifecycle:lifecycle-livedata-ktx:2.7.0\")\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0\")\r\n\r\n    // Room Database\r\n    implementation(\"androidx.room:room-runtime:2.6.1\")\r\n    implementation(\"androidx.room:room-ktx:2.6.1\")\r\n    kapt(\"androidx.room:room-compiler:2.6.1\")\r\n\r\n    // Kotlin Coroutines\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3\")\r\n\r\n    // Location Services\r\n    implementation(\"com.google.android.gms:play-services-location:21.0.1\")\r\n\r\n    // Navigation Components\r\n    implementation(\"androidx.navigation:navigation-compose:2.7.5\")\r\n\r\n    // Dependências de navegação Jetpack Compose\r\n    implementation(\"androidx.navigation:navigation-compose:2.7.6\")\r\n\r\n    implementation(\"org.jetbrains.kotlin:kotlin-stdlib:1.9.10\")\r\n\r\n    // ViewModel and LiveData\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0\")\r\n    implementation(\"androidx.lifecycle:lifecycle-livedata-ktx:2.7.0\")\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0\")\r\n\r\n    // Room Database\r\n    implementation(\"androidx.room:room-runtime:2.6.1\")\r\n    implementation(\"androidx.room:room-ktx:2.6.1\")\r\n    kapt(\"androidx.room:room-compiler:2.6.1\")\r\n\r\n    // Kotlin Coroutines\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3\")\r\n\r\n    // Location Services\r\n    implementation(\"com.google.android.gms:play-services-location:21.0.1\")\r\n\r\n    // Navigation Components\r\n    implementation(\"androidx.navigation:navigation-compose:2.7.5\")\r\n\r\n    // Dependências de navegação Jetpack Compose\r\n    implementation(\"androidx.navigation:navigation-compose:2.7.6\")\r\n\r\n    implementation(\"org.jetbrains.kotlin:kotlin-stdlib:1.9.10\")\r\n    // Ktor\r\n    implementation(\"io.ktor:ktor-client-core:2.3.5\")\r\n    implementation(\"io.ktor:ktor-client-cio:2.3.5\")\r\n    implementation(\"io.ktor:ktor-client-content-negotiation:2.3.5\")\r\n    implementation(\"io.ktor:ktor-serialization-kotlinx-json:2.3.5\")\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/build.gradle.kts	(date 1746454618311)
+@@ -4,6 +4,7 @@
+     alias(libs.plugins.kotlin.compose)
+     id("kotlin-kapt")
+     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
++    kotlin("plugin.serialization") version "1.9.21"
+ }
+ 
+ android {
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CodeInsightWorkspaceSettings\">\r\n    <option name=\"optimizeImportsOnTheFly\" value=\"true\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" default=\"true\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/.idea/misc.xml	(date 1746454747490)
+@@ -3,5 +3,5 @@
+   <component name="CodeInsightWorkspaceSettings">
+     <option name="optimizeImportsOnTheFly" value="true" />
+   </component>
+-  <component name="ProjectRootManager" version="2" default="true" />
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
+ </project>
+\ No newline at end of file
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>\r\n    <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>\r\n    <uses-permission android:name=\"android.permission.INTERNET\"/>\r\n\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.FlashCardApp\"\r\n        tools:targetApi=\"31\">\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"true\"\r\n            android:label=\"@string/app_name\"\r\n            android:theme=\"@style/Theme.FlashCardApp\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/AndroidManifest.xml	(date 1746456494368)
+@@ -5,6 +5,7 @@
+     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+     <uses-permission android:name="android.permission.INTERNET"/>
++    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+ 
+ 
+     <application
+Index: app/src/main/java/com/example/flashcardapp/data/entities/Deck.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.entities\r\n\r\nimport androidx.room.Entity\r\nimport androidx.room.PrimaryKey\r\n\r\n/**\r\n * Entidade de Deck/Baralho\r\n */\r\n@Entity(tableName = \"decks\")\r\ndata class Deck(\r\n    @PrimaryKey(autoGenerate = true) val deckId: Long = 0,\r\n    val name: String,\r\n    val description: String? = null,\r\n    val creationDate: Long = System.currentTimeMillis()\r\n)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/entities/Deck.kt b/app/src/main/java/com/example/flashcardapp/data/entities/Deck.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/entities/Deck.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/entities/Deck.kt	(date 1746454743197)
+@@ -2,10 +2,12 @@
+ 
+ import androidx.room.Entity
+ import androidx.room.PrimaryKey
++import kotlinx.serialization.Serializable
+ 
+ /**
+  * Entidade de Deck/Baralho
+  */
++@Serializable
+ @Entity(tableName = "decks")
+ data class Deck(
+     @PrimaryKey(autoGenerate = true) val deckId: Long = 0,
+Index: app/src/main/java/com/example/flashcardapp/data/entities/StudyInfo.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.entities\r\n\r\nimport androidx.room.*\r\n\r\n/**\r\n * Entidade para informações de estudo de flashcard\r\n */\r\n@Entity(tableName = \"study_info\",\r\n    foreignKeys = [\r\n        ForeignKey(\r\n            entity = Flashcard::class,\r\n            parentColumns = [\"flashcardId\"],\r\n            childColumns = [\"flashcard_id\"],\r\n            onDelete = ForeignKey.CASCADE\r\n        )\r\n    ],\r\n    indices = [Index(\"flashcard_id\")]\r\n)\r\ndata class StudyInfo(\r\n    @PrimaryKey @ColumnInfo(name = \"flashcard_id\") val flashcardId: Long,\r\n    var easeFactor: Double = 2.5, // Fator de facilidade inicial\r\n    var interval: Int = 0, // Intervalo em dias\r\n    var repetitions: Int = 0, // Número de repetições\r\n    var lastDifficulty: Int = 0, // Última avaliação (0-4)\r\n    var nextReviewDate: Long = 0, // Data da próxima revisão\r\n    var lastReviewDate: Long = 0, // Data da última revisão\r\n    // Armazena IDs de localizações onde este cartão foi revisado\r\n    // Formato: \"1|3|5\" para localizações 1, 3 e 5\r\n    var reviewLocations: String = \"\"\r\n)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/entities/StudyInfo.kt b/app/src/main/java/com/example/flashcardapp/data/entities/StudyInfo.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/entities/StudyInfo.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/entities/StudyInfo.kt	(date 1746454743205)
+@@ -1,10 +1,12 @@
+ package com.example.flashcardapp.data.entities
+ 
+ import androidx.room.*
++import kotlinx.serialization.Serializable
+ 
+ /**
+  * Entidade para informações de estudo de flashcard
+  */
++@Serializable
+ @Entity(tableName = "study_info",
+     foreignKeys = [
+         ForeignKey(
+Index: app/src/main/java/com/example/flashcardapp/data/entities/StudyLocation.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.entities\r\n\r\nimport androidx.room.Entity\r\nimport androidx.room.PrimaryKey\r\n\r\n/**\r\n * Entidade para localizações favoritas\r\n */\r\n@Entity(tableName = \"locations\")\r\ndata class StudyLocation(\r\n    @PrimaryKey(autoGenerate = true) val locationId: Long = 0,\r\n    val name: String,\r\n    val latitude: Double,\r\n    val longitude: Double,\r\n    val creationDate: Long = System.currentTimeMillis()\r\n)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/entities/StudyLocation.kt b/app/src/main/java/com/example/flashcardapp/data/entities/StudyLocation.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/entities/StudyLocation.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/entities/StudyLocation.kt	(date 1746454743229)
+@@ -2,10 +2,12 @@
+ 
+ import androidx.room.Entity
+ import androidx.room.PrimaryKey
++import kotlinx.serialization.Serializable
+ 
+ /**
+  * Entidade para localizações favoritas
+  */
++@Serializable
+ @Entity(tableName = "locations")
+ data class StudyLocation(
+     @PrimaryKey(autoGenerate = true) val locationId: Long = 0,
+Index: app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.ui.screens\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.Arrangement\r\nimport androidx.compose.foundation.layout.Box\r\nimport androidx.compose.foundation.layout.Column\r\nimport androidx.compose.foundation.layout.PaddingValues\r\nimport androidx.compose.foundation.layout.Row\r\nimport androidx.compose.foundation.layout.Spacer\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.foundation.layout.fillMaxWidth\r\nimport androidx.compose.foundation.layout.height\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.compose.foundation.layout.size\r\nimport androidx.compose.foundation.lazy.LazyColumn\r\nimport androidx.compose.foundation.lazy.items\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.Add\r\nimport androidx.compose.material.icons.filled.BarChart\r\nimport androidx.compose.material.icons.filled.Check\r\nimport androidx.compose.material.icons.filled.Download\r\nimport androidx.compose.material.icons.filled.LocalFireDepartment\r\nimport androidx.compose.material.icons.filled.LocationOn\r\nimport androidx.compose.material.icons.filled.Sync\r\nimport androidx.compose.material3.AlertDialog\r\nimport androidx.compose.material3.Button\r\nimport androidx.compose.material3.ButtonDefaults\r\nimport androidx.compose.material3.Card\r\nimport androidx.compose.material3.CardDefaults\r\nimport androidx.compose.material3.CircularProgressIndicator\r\nimport androidx.compose.material3.ExperimentalMaterial3Api\r\nimport androidx.compose.material3.FloatingActionButton\r\nimport androidx.compose.material3.Icon\r\nimport androidx.compose.material3.IconButton\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.OutlinedButton\r\nimport androidx.compose.material3.OutlinedTextField\r\nimport androidx.compose.material3.OutlinedTextFieldDefaults\r\nimport androidx.compose.material3.Scaffold\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.material3.TextButton\r\nimport androidx.compose.material3.TopAppBar\r\nimport androidx.compose.material3.TopAppBarDefaults\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.collectAsState\r\nimport androidx.compose.runtime.getValue\r\nimport androidx.compose.runtime.mutableStateOf\r\nimport androidx.compose.runtime.remember\r\nimport androidx.compose.runtime.setValue\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.style.TextOverflow\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.navigation.NavController\r\nimport androidx.room.Room\r\nimport com.example.flashcardapp.services.SyncService\r\nimport com.example.flashcardapp.ui.model.DeckWithStats\r\nimport com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel\r\nimport kotlin.math.roundToInt\r\n\r\n// Definindo as cores da nova paleta\r\nprivate val GreenPrimary = Color(0xFF4CAF50) // Verde principal\r\nprivate val GreenDark = Color(0xFF388E3C) // Verde escuro para elementos de destaque\r\nprivate val GreenLight = Color(0xFFC8E6C9) // Verde claro para fundos secundários\r\nprivate val BlueDark = Color(0xFF1A237E) // Azul profundo para contraste\r\nprivate val GreenPale = Color(0xFFE8F5E9) // Verde pálido para fundos\r\nprivate val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos interativos\r\nprivate val GrayLight = Color(0xFFF5F5F5) // Cinza claro para áreas de texto\r\nprivate val GrayDark = Color(0xFF424242) // Cinza escuro para textos principais\r\nprivate val RedError = Color(0xFFEF5350) // Vermelho para erros\r\nprivate val BlueInfo = Color(0xFF42A5F5) // Azul para informações\r\n\r\n@OptIn(ExperimentalMaterial3Api::class)\r\n@Composable\r\nfun DeckListScreen(\r\n    navController: NavController,\r\n    viewModel: FlashcardAppViewModel\r\n) {\r\n    val deckListState by viewModel.deckListUiState.collectAsState()\r\n    val userStatsState by viewModel.userStatsUiState.collectAsState()\r\n    var showCreateDeckDialog by remember { mutableStateOf(false) }\r\n\r\n    Scaffold(\r\n        containerColor = GreenPale,\r\n        topBar = {\r\n            TopAppBar(\r\n                title = { Text(\"\", color = Color.White) },\r\n                colors = TopAppBarDefaults.topAppBarColors(\r\n                    containerColor = GreenPrimary,\r\n                    titleContentColor = Color.White,\r\n                    actionIconContentColor = Color.White\r\n                ),\r\n                navigationIcon = {\r\n                    Row(\r\n                        modifier = Modifier.padding(start = 16.dp),\r\n                        horizontalArrangement = Arrangement.spacedBy(16.dp),\r\n                        verticalAlignment = Alignment.CenterVertically\r\n                    ) {\r\n                        // Ícone de sequência de dias (chama)\r\n                        Row(\r\n                            verticalAlignment = Alignment.CenterVertically,\r\n                            horizontalArrangement = Arrangement.spacedBy(4.dp)\r\n                        ) {\r\n                            Icon(\r\n                                imageVector = Icons.Default.LocalFireDepartment,\r\n                                contentDescription = \"Dias consecutivos\",\r\n                                tint = AmberAccent\r\n                            )\r\n                            Text(\r\n                                text = \"${userStatsState.streakDays}\",\r\n                                color = Color.White,\r\n                                style = MaterialTheme.typography.bodyMedium\r\n                            )\r\n                        }\r\n\r\n                        // Ícone de taxa de acerto\r\n                        Row(\r\n                            verticalAlignment = Alignment.CenterVertically,\r\n                            horizontalArrangement = Arrangement.spacedBy(4.dp)\r\n                        ) {\r\n                            Box(\r\n                                modifier = Modifier\r\n                                    .background(\r\n                                        color = GreenDark,\r\n                                        shape = CircleShape\r\n                                    )\r\n                                    .padding(4.dp)\r\n                            ) {\r\n                                Icon(\r\n                                    imageVector = Icons.Default.Check,\r\n                                    contentDescription = \"Taxa de acerto\",\r\n                                    tint = Color.White,\r\n                                    modifier = Modifier.size(16.dp)\r\n                                )\r\n                            }\r\n                            Text(\r\n                                text = \"${(userStatsState.correctAnswerRate * 100).roundToInt()}%\",\r\n                                color = Color.White,\r\n                                style = MaterialTheme.typography.bodyMedium\r\n                            )\r\n                        }\r\n                    }\r\n                },\r\n                actions = {\r\n                    IconButton(onClick = { viewModel.sync() }) {\r\n                        Icon(Icons.Default.Sync, contentDescription = \"Sync\", tint = Color.White)\r\n                    }\r\n                    IconButton(onClick = { viewModel.downloadData() }) {\r\n                        Icon(Icons.Default.Download, contentDescription = \"Sync\", tint = Color.White)\r\n                    }\r\n                    IconButton(onClick = { navController.navigate(\"stats\") }) {\r\n                        Icon(Icons.Default.BarChart, contentDescription = \"Statistics\", tint = Color.White)\r\n                    }\r\n                    IconButton(onClick = { navController.navigate(\"locations\") }) {\r\n                        Icon(Icons.Default.LocationOn, contentDescription = \"Locations\", tint = Color.White)\r\n                    }\r\n                }\r\n            )\r\n        },\r\n        floatingActionButton = {\r\n            FloatingActionButton(\r\n                onClick = { showCreateDeckDialog = true },\r\n                containerColor = GreenDark,\r\n                contentColor = Color.White\r\n            ) {\r\n                Icon(Icons.Default.Add, contentDescription = \"Add Deck\")\r\n            }\r\n        }\r\n    ) { paddingValues ->\r\n        Box(\r\n            modifier = Modifier\r\n                .fillMaxSize()\r\n                .background(GreenPale)\r\n                .padding(paddingValues)\r\n        ) {\r\n            if (deckListState.isLoading) {\r\n                CircularProgressIndicator(\r\n                    modifier = Modifier.align(Alignment.Center),\r\n                    color = GreenDark\r\n                )\r\n            } else if (deckListState.decks.isEmpty()) {\r\n                Text(\r\n                    text = \"Nenhum baralho encontrado. Crie um novo!\",\r\n                    color = GrayDark,\r\n                    modifier = Modifier\r\n                        .align(Alignment.Center)\r\n                        .padding(16.dp)\r\n                )\r\n            } else {\r\n                LazyColumn(\r\n                    modifier = Modifier.fillMaxSize(),\r\n                    contentPadding = PaddingValues(16.dp),\r\n                    verticalArrangement = Arrangement.spacedBy(8.dp)\r\n                ) {\r\n                    items(deckListState.decks) { deckWithStats ->\r\n                        DeckCard(\r\n                            deckWithStats = deckWithStats,\r\n                            onClick = { navController.navigate(\"deck/${deckWithStats.deck.deckId}\") },\r\n                            onStudyClick = { navController.navigate(\"study/${deckWithStats.deck.deckId}\") }\r\n                        )\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    if (showCreateDeckDialog) {\r\n        CreateDeckDialog(\r\n            onDismiss = { showCreateDeckDialog = false },\r\n            onCreate = { name, description ->\r\n                viewModel.createDeck(name, description)\r\n                showCreateDeckDialog = false\r\n            }\r\n        )\r\n    }\r\n}\r\n\r\n@OptIn(ExperimentalMaterial3Api::class)\r\n@Composable\r\nfun DeckCard(\r\n    deckWithStats: DeckWithStats,\r\n    onClick: () -> Unit,\r\n    onStudyClick: () -> Unit\r\n) {\r\n    Card(\r\n        onClick = onClick,\r\n        modifier = Modifier.fillMaxWidth(),\r\n        colors = CardDefaults.cardColors(containerColor = Color.White),\r\n        shape = RoundedCornerShape(8.dp)\r\n    ) {\r\n        Column(\r\n            modifier = Modifier.padding(16.dp)\r\n        ) {\r\n            Text(\r\n                text = deckWithStats.deck.name,\r\n                style = MaterialTheme.typography.titleMedium,\r\n                color = GrayDark\r\n            )\r\n\r\n            if (!deckWithStats.deck.description.isNullOrEmpty()) {\r\n                Text(\r\n                    text = deckWithStats.deck.description,\r\n                    style = MaterialTheme.typography.bodyMedium,\r\n                    color = GrayDark.copy(alpha = 0.8f),\r\n                    maxLines = 2,\r\n                    overflow = TextOverflow.Ellipsis,\r\n                    modifier = Modifier.padding(top = 4.dp)\r\n                )\r\n            }\r\n\r\n            Row(\r\n                modifier = Modifier\r\n                    .fillMaxWidth()\r\n                    .padding(top = 8.dp),\r\n                horizontalArrangement = Arrangement.SpaceBetween,\r\n                verticalAlignment = Alignment.CenterVertically\r\n            ) {\r\n                Text(\r\n                    text = \"Cartões: ${deckWithStats.cardCount} (${deckWithStats.dueCardCount} para revisar)\",\r\n                    style = MaterialTheme.typography.bodySmall,\r\n                    color = if (deckWithStats.dueCardCount > 0) AmberAccent else BlueDark\r\n                )\r\n\r\n                if (deckWithStats.dueCardCount > 0) {\r\n                    Button(\r\n                        onClick = onStudyClick,\r\n                        colors = ButtonDefaults.buttonColors(\r\n                            containerColor = GreenDark,\r\n                            contentColor = Color.White\r\n                        )\r\n                    ) {\r\n                        Text(\"Estudar\")\r\n                    }\r\n                } else {\r\n                    OutlinedButton(\r\n                        onClick = onStudyClick,\r\n                        colors = ButtonDefaults.outlinedButtonColors(\r\n                            contentColor = GreenDark\r\n                        )\r\n                    ) {\r\n                        Text(\"Revisar\")\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun CreateDeckDialog(\r\n    onDismiss: () -> Unit,\r\n    onCreate: (name: String, description: String?) -> Unit\r\n) {\r\n    var deckName by remember { mutableStateOf(\"\") }\r\n    var deckDescription by remember { mutableStateOf(\"\") }\r\n\r\n    AlertDialog(\r\n        onDismissRequest = onDismiss,\r\n        containerColor = Color.White,\r\n        titleContentColor = GrayDark,\r\n        textContentColor = GrayDark,\r\n        title = { Text(\"Criar Novo Baralho\") },\r\n        text = {\r\n            Column {\r\n                OutlinedTextField(\r\n                    value = deckName,\r\n                    onValueChange = { deckName = it },\r\n                    label = { Text(\"Nome do Baralho\", color = GrayDark.copy(alpha = 0.7f)) },\r\n                    modifier = Modifier.fillMaxWidth(),\r\n                    colors = OutlinedTextFieldDefaults.colors(\r\n                        focusedBorderColor = GreenPrimary,\r\n                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),\r\n                        focusedTextColor = GrayDark,\r\n                        unfocusedTextColor = GrayDark\r\n                    )\r\n                )\r\n\r\n                Spacer(modifier = Modifier.height(8.dp))\r\n\r\n                OutlinedTextField(\r\n                    value = deckDescription,\r\n                    onValueChange = { deckDescription = it },\r\n                    label = { Text(\"Descrição (Opcional)\", color = GrayDark.copy(alpha = 0.7f)) },\r\n                    modifier = Modifier.fillMaxWidth(),\r\n                    colors = OutlinedTextFieldDefaults.colors(\r\n                        focusedBorderColor = GreenPrimary,\r\n                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),\r\n                        focusedTextColor = GrayDark,\r\n                        unfocusedTextColor = GrayDark\r\n                    )\r\n                )\r\n            }\r\n        },\r\n        confirmButton = {\r\n            Button(\r\n                onClick = { onCreate(deckName, deckDescription.ifEmpty { null }) },\r\n                enabled = deckName.isNotBlank(),\r\n                colors = ButtonDefaults.buttonColors(\r\n                    containerColor = GreenDark,\r\n                    contentColor = Color.White,\r\n                    disabledContainerColor = GreenDark.copy(alpha = 0.5f)\r\n                )\r\n            ) {\r\n                Text(\"Criar\")\r\n            }\r\n        },\r\n        dismissButton = {\r\n            TextButton(\r\n                onClick = onDismiss,\r\n                colors = ButtonDefaults.textButtonColors(\r\n                    contentColor = BlueDark\r\n                )\r\n            ) {\r\n                Text(\"Cancelar\")\r\n            }\r\n        }\r\n    )\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt b/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt
+--- a/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt	(date 1746455296275)
+@@ -149,7 +149,7 @@
+                         Icon(Icons.Default.Sync, contentDescription = "Sync", tint = Color.White)
+                     }
+                     IconButton(onClick = { viewModel.downloadData() }) {
+-                        Icon(Icons.Default.Download, contentDescription = "Sync", tint = Color.White)
++                        Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.White)
+                     }
+                     IconButton(onClick = { navController.navigate("stats") }) {
+                         Icon(Icons.Default.BarChart, contentDescription = "Statistics", tint = Color.White)
+Index: app/src/main/java/com/example/flashcardapp/data/entities/UserStats.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.entities\r\n\r\nimport androidx.room.Entity\r\nimport androidx.room.PrimaryKey\r\n\r\n/**\r\n * Entidade para armazenar estatísticas do usuário\r\n */\r\n@Entity(tableName = \"user_stats\")\r\ndata class UserStats(\r\n    @PrimaryKey val id: Int = 1, // Singleton - apenas uma instância\r\n    var correctAnswers: Int = 0,\r\n    var totalAnswers: Int = 0,\r\n    var streakDays: Int = 0,\r\n    var maxStreakDays: Int = 0,\r\n    var lastStudyDate: Long = 0, // Timestamp do último estudo\r\n    var totalStudyDays: Int = 0\r\n)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/entities/UserStats.kt b/app/src/main/java/com/example/flashcardapp/data/entities/UserStats.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/entities/UserStats.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/entities/UserStats.kt	(date 1746454743221)
+@@ -2,10 +2,12 @@
+ 
+ import androidx.room.Entity
+ import androidx.room.PrimaryKey
++import kotlinx.serialization.Serializable
+ 
+ /**
+  * Entidade para armazenar estatísticas do usuário
+  */
++@Serializable
+ @Entity(tableName = "user_stats")
+ data class UserStats(
+     @PrimaryKey val id: Int = 1, // Singleton - apenas uma instância

@@ -148,8 +148,8 @@ fun DeckListScreen(
                     IconButton(onClick = { viewModel.sync() }) {
                         Icon(Icons.Default.Sync, contentDescription = "Sync", tint = Color.White)
                     }
-                    IconButton(onClick = { viewModel.downloadData() }) {
-                        Icon(Icons.Default.Download, contentDescription = "Sync", tint = Color.White)
+                    IconButton(onClick = { /*viewModel.downloadData()*/ }) {
+                        Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.White)
                     }
                     IconButton(onClick = { navController.navigate("stats") }) {
                         Icon(Icons.Default.BarChart, contentDescription = "Statistics", tint = Color.White)

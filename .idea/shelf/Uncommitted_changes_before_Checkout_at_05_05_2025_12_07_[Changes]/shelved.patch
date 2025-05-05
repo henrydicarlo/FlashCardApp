@@ -1,0 +1,49 @@
+Index: app/src/main/java/com/example/flashcardapp/data/database/FlashcardAppDatabase.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.database\r\n\r\nimport android.content.Context\r\nimport androidx.room.Database\r\nimport androidx.room.Room\r\nimport androidx.room.RoomDatabase\r\nimport com.example.flashcardapp.data.dao.*\r\nimport com.example.flashcardapp.data.entities.*\r\n\r\n@Database(\r\n    entities = [\r\n        UserStats::class,\r\n        Deck::class,\r\n        Flashcard::class,\r\n        StudyInfo::class,\r\n        StudyLocation::class\r\n    ],\r\n    version = 1\r\n)\r\nabstract class FlashcardAppDatabase : RoomDatabase() {\r\n    abstract fun userStatsDao(): UserStatsDao\r\n    abstract fun deckDao(): DeckDao\r\n    abstract fun flashcardDao(): FlashcardDao\r\n    abstract fun studyInfoDao(): StudyInfoDao\r\n    abstract fun locationDao(): LocationDao\r\n\r\n    companion object {\r\n        @Volatile\r\n        private var INSTANCE: FlashcardAppDatabase? = null\r\n\r\n        fun getDatabase(context: Context): FlashcardAppDatabase {\r\n            return INSTANCE ?: synchronized(this) {\r\n                val instance = Room.databaseBuilder(\r\n                    context.applicationContext,\r\n                    FlashcardAppDatabase::class.java,\r\n                    \"flashcard_app_database\"\r\n                ).build()\r\n                INSTANCE = instance\r\n                instance\r\n            }\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/database/FlashcardAppDatabase.kt b/app/src/main/java/com/example/flashcardapp/data/database/FlashcardAppDatabase.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/database/FlashcardAppDatabase.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/database/FlashcardAppDatabase.kt	(date 1746457477779)
+@@ -4,6 +4,7 @@
+ import androidx.room.Database
+ import androidx.room.Room
+ import androidx.room.RoomDatabase
++import androidx.room.TypeConverters
+ import com.example.flashcardapp.data.dao.*
+ import com.example.flashcardapp.data.entities.*
+ 
+@@ -17,6 +18,7 @@
+     ],
+     version = 1
+ )
++@TypeConverters(Converters::class)
+ abstract class FlashcardAppDatabase : RoomDatabase() {
+     abstract fun userStatsDao(): UserStatsDao
+     abstract fun deckDao(): DeckDao
+Index: app/src/main/java/com/example/flashcardapp/data/entities/Flashcard.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.data.entities\r\n\r\nimport androidx.room.*\r\n\r\n/**\r\n * Entidade de Flashcard\r\n */\r\n@Entity(tableName = \"flashcards\",\r\n    foreignKeys = [\r\n        ForeignKey(\r\n            entity = Deck::class,\r\n            parentColumns = [\"deckId\"],\r\n            childColumns = [\"deck_id\"],\r\n            onDelete = ForeignKey.CASCADE\r\n        )\r\n    ],\r\n    indices = [Index(\"deck_id\")]\r\n)\r\ndata class Flashcard(\r\n    @PrimaryKey(autoGenerate = true) val flashcardId: Long = 0,\r\n    @ColumnInfo(name = \"deck_id\") val deckId: Long,\r\n    val type: FlashcardType,\r\n    val question: String,\r\n    val answer: String,\r\n    // Para flashcards do tipo QUIZ, armazena opções separadas por |\r\n    val options: String? = null,\r\n    // Para flashcards do tipo CLOZE, pode armazenar o texto completo\r\n    val fullText: String? = null,\r\n    val creationDate: Long = System.currentTimeMillis()\r\n)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/data/entities/Flashcard.kt b/app/src/main/java/com/example/flashcardapp/data/entities/Flashcard.kt
+--- a/app/src/main/java/com/example/flashcardapp/data/entities/Flashcard.kt	(revision cf8b1497294671b4e6c3cc9d81a9d86a6407a162)
++++ b/app/src/main/java/com/example/flashcardapp/data/entities/Flashcard.kt	(date 1746454743236)
+@@ -1,10 +1,12 @@
+ package com.example.flashcardapp.data.entities
+ 
+ import androidx.room.*
++import kotlinx.serialization.Serializable
+ 
+ /**
+  * Entidade de Flashcard
+  */
++@Serializable
+ @Entity(tableName = "flashcards",
+     foreignKeys = [
+         ForeignKey(
