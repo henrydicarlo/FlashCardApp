@@ -265,33 +265,12 @@ fun FlashcardCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Indicador do tipo de flashcard com ícone
-                val (typeIcon, typeColor) = when (flashcard.type) {
-                    FlashcardType.BASIC -> Pair(Icons.Default.PlayArrow, BluePrimary)
-                    FlashcardType.QUIZ -> Pair(Icons.Default.PlayArrow, MagentaSecondary)
-                    FlashcardType.CLOZE -> Pair(Icons.Default.PlayArrow, PurpleTransition)
-                    FlashcardType.INPUT -> Pair(Icons.Default.Create, InfoBlue)
-                }
+
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(typeColor.copy(alpha = 0.1f))
-                            .border(1.dp, typeColor.copy(alpha = 0.3f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = typeIcon,
-                            contentDescription = flashcard.type.name,
-                            tint = typeColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
 
                     Spacer(modifier = Modifier.width(12.dp))
 
