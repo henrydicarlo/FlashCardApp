@@ -193,7 +193,8 @@ fun FlashcardStudyContent(
                             text = if (isAnswerRevealed) full else masked,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            modifier = Modifier.padding(bottom = 24.dp),
+                            color = Color.Black
                         )
 
                         if (!isAnswerRevealed) {
@@ -219,6 +220,10 @@ fun FlashcardStudyContent(
                             val isSelected = option == selectedOption
 
                             val bgColor = when {
+                                selectedOption != null && isCorrect -> Color(0xFF74F197)
+                                selectedOption != null && isSelected && !isCorrect -> Color(
+                                    0xC9EF3346
+                                )
                                 selectedOption != null && isCorrect -> Color(0xFFB9F6CA)
                                 selectedOption != null && isSelected && !isCorrect -> Color(
                                     0xFFFFCDD2
@@ -239,7 +244,7 @@ fun FlashcardStudyContent(
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             ) {
-                                Text(option)
+                                Text(option, color = Color.Black)
                             }
                         }
                     }
@@ -277,6 +282,10 @@ fun FlashcardStudyContent(
                                 userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
                             val feedbackColor =
                                 if (isCorrect) Color(0xFFB9F6CA) else Color(0xFFFFCDD2)
+                            val isCorrect = userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
+                            val feedbackColor = if (isCorrect) Color(0xFF06EC46) else Color(
+                                0xFFF6152C
+                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -332,7 +341,7 @@ fun FlashcardStudyContent(
             setCanNavigateBack(false)
 
             Text(
-                text = "Como você se saiu?",
+                text = "O que achou dessa questão?",
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -361,6 +370,20 @@ fun FlashcardStudyContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                Button(
+                    onClick = { onRateCard(0) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) { Text("Difícil", color = Color.Black) }
+
+                Button(
+                    onClick = { onRateCard(1) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) { Text("Bom", color = Color.Black) }
+
+                Button(
+                    onClick = { onRateCard(2) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                ) { Text("Fácil", color = Color.Black) }
                 predictions.forEach { (rating, label, formattedDate) ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
