@@ -59,6 +59,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -180,6 +181,7 @@ fun DeckDetailScreen(
                         Text(
                             text = "Clique no botão + para adicionar flashcards a este baralho",
                             style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
                             color = NeutralDark.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 8.dp)
                         )

@@ -165,7 +165,7 @@ fun StatsScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MagentaSecondary.copy(alpha = 0.8f)
+                                containerColor = MagentaSecondary.copy(alpha = 1f)
                             ),
                             shape = RoundedCornerShape(12.dp)
                         ) {

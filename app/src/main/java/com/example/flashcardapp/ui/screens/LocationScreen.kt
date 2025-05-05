@@ -298,7 +298,9 @@ fun EmptyLocationsView(modifier: Modifier = Modifier) {
         Text(
             text = "Nenhuma localização de estudo ainda",
             style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
             color = NeutralDark
+
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(

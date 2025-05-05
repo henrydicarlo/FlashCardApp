@@ -1,5 +1,6 @@
 package com.example.flashcardapp.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,14 +60,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.room.Room
+import com.example.flashcardapp.R
 import com.example.flashcardapp.services.SyncService
 import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
@@ -80,12 +88,10 @@ private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
 private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
 private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
 
-// Gradiente principal para elementos destacados
 private val GradientPrimary = Brush.horizontalGradient(
     colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
 )
 
-// Gradiente suave para fundos e elementos decorativos
 private val GradientBackground = Brush.verticalGradient(
     colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
 )
@@ -104,47 +110,73 @@ fun DeckListScreen(
         containerColor = NeutralLight,
         topBar = {
             TopAppBar(
-                title = { Text("", color = Color.White) },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // App logo
+                        Image(
+                            painter = painterResource(id = R.mipmap.logoitera),
+                            contentDescription = "App Logo",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+
+                        // App name or empty text if you prefer
+                        Text("Itera", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BluePrimary,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
-                navigationIcon = {
-                    Row(
-                        modifier = Modifier.padding(start = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                actions = {
+                    // Stats card in a nice compact design
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = BluePrimary.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        // Ícone de sequência de dias (chama)
                         Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.LocalFireDepartment,
-                                contentDescription = "Dias consecutivos",
-                                tint = AmberAccent
-                            )
-                            Text(
-                                text = "${userStatsState.streakDays}",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+                            // Streak days with flame icon
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocalFireDepartment,
+                                    contentDescription = "Dias consecutivos",
+                                    tint = AmberAccent,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${userStatsState.streakDays}",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
 
-                        // Ícone de taxa de acerto
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
+                            // Divider
                             Box(
                                 modifier = Modifier
-                                    .background(
-                                        color = MagentaSecondary,
-                                        shape = CircleShape
-                                    )
-                                    .padding(4.dp)
+                                    .height(16.dp)
+                                    .width(1.dp)
+                                    .background(Color.White.copy(alpha = 0.3f))
+                            )
+
+                            // Correct answer rate
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
@@ -152,27 +184,86 @@ fun DeckListScreen(
                                     tint = Color.White,
                                     modifier = Modifier.size(16.dp)
                                 )
+                                Text(
+                                    text = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
-                            Text(
-                                text = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
                         }
                     }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.sync() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Sync", tint = Color.White)
+
+                    // Menu with all options
+                    var showMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = Color.White
+                        )
                     }
-                    IconButton(onClick = { viewModel.downloadData() }) {
-                        Icon(Icons.Default.Download, contentDescription = "Sync", tint = Color.White)
-                    }
-                    IconButton(onClick = { navController.navigate("stats") }) {
-                        Icon(Icons.Default.BarChart, contentDescription = "Statistics", tint = Color.White)
-                    }
-                    IconButton(onClick = { navController.navigate("locations") }) {
-                        Icon(Icons.Default.LocationOn, contentDescription = "Locations", tint = Color.White)
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(Color.White)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Sincronizar") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = "Sync",
+                                    tint = BluePrimary
+                                )
+                            },
+                            onClick = {
+                                viewModel.sync()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Baixar dados") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Download,
+                                    contentDescription = "Download",
+                                    tint = BluePrimary
+                                )
+                            },
+                            onClick = {
+                                viewModel.downloadData()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Estatísticas") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.BarChart,
+                                    contentDescription = "Statistics",
+                                    tint = BluePrimary
+                                )
+                            },
+                            onClick = {
+                                navController.navigate("stats")
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Locais de Estudo") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.LocationOn,
+                                    contentDescription = "Locations",
+                                    tint = BluePrimary
+                                )
+                            },
+                            onClick = {
+                                navController.navigate("locations")
+                                showMenu = false
+                            }
+                        )
                     }
                 }
             )
