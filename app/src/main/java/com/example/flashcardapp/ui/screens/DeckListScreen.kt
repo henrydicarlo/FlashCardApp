@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +28,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,6 +56,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,16 +69,27 @@ import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
 
 // Definindo as cores da nova paleta
-private val GreenPrimary = Color(0xFF4CAF50) // Verde principal
-private val GreenDark = Color(0xFF388E3C) // Verde escuro para elementos de destaque
-private val GreenLight = Color(0xFFC8E6C9) // Verde claro para fundos secundários
-private val BlueDark = Color(0xFF1A237E) // Azul profundo para contraste
-private val GreenPale = Color(0xFFE8F5E9) // Verde pálido para fundos
-private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos interativos
-private val GrayLight = Color(0xFFF5F5F5) // Cinza claro para áreas de texto
-private val GrayDark = Color(0xFF424242) // Cinza escuro para textos principais
-private val RedError = Color(0xFFEF5350) // Vermelho para erros
-private val BlueInfo = Color(0xFF42A5F5) // Azul para informações
+private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
+private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
+private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
+private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
+private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
+private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
+private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
+private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
+
+// Gradiente principal para elementos destacados
+private val GradientPrimary = Brush.horizontalGradient(
+    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
+)
+
+// Gradiente suave para fundos e elementos decorativos
+private val GradientBackground = Brush.verticalGradient(
+    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,12 +102,12 @@ fun DeckListScreen(
     var showCreateDeckDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = GreenPale,
+        containerColor = NeutralLight,
         topBar = {
             TopAppBar(
                 title = { Text("", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GreenPrimary,
+                    containerColor = BluePrimary,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
@@ -128,7 +142,7 @@ fun DeckListScreen(
                             Box(
                                 modifier = Modifier
                                     .background(
-                                        color = GreenDark,
+                                        color = MagentaSecondary,
                                         shape = CircleShape
                                     )
                                     .padding(4.dp)
@@ -150,7 +164,7 @@ fun DeckListScreen(
                 },
                 actions = {
                     IconButton(onClick = { viewModel.sync() }) {
-                        Icon(Icons.Default.Sync, contentDescription = "Sync", tint = Color.White)
+                        Icon(Icons.Default.Refresh, contentDescription = "Sync", tint = Color.White)
                     }
                     IconButton(onClick = { viewModel.downloadData() }) {
                         Icon(Icons.Default.Download, contentDescription = "Sync", tint = Color.White)
@@ -167,7 +181,7 @@ fun DeckListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateDeckDialog = true },
-                containerColor = GreenDark,
+                containerColor = MagentaSecondary,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Deck")
@@ -190,18 +204,18 @@ fun DeckListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(GreenPale)
+                    .background(NeutralLight)
                     .padding(paddingValues)
             ) {
                 if (deckListState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = GreenDark
+                        color = BluePrimary
                     )
                 } else if (deckListState.decks.isEmpty()) {
                     Text(
                         text = "Nenhum baralho encontrado. Crie um novo!",
-                        color = GrayDark,
+                        color = NeutralDark,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
@@ -225,7 +239,7 @@ fun DeckListScreen(
         }
     }
 
-        if (showCreateDeckDialog) {
+    if (showCreateDeckDialog) {
         CreateDeckDialog(
             onDismiss = { showCreateDeckDialog = false },
             onCreate = { name, description ->
@@ -247,22 +261,33 @@ fun DeckCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = deckWithStats.deck.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = GrayDark
-            )
+            // Título com Destaque Colorido
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(MagentaSecondary)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = deckWithStats.deck.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = NeutralDark
+                )
+            }
 
             if (!deckWithStats.deck.description.isNullOrEmpty()) {
                 Text(
                     text = deckWithStats.deck.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GrayDark.copy(alpha = 0.8f),
+                    color = NeutralDark.copy(alpha = 0.8f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 4.dp)
@@ -279,16 +304,17 @@ fun DeckCard(
                 Text(
                     text = "Cartões: ${deckWithStats.cardCount} (${deckWithStats.dueCardCount} para revisar)",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (deckWithStats.dueCardCount > 0) AmberAccent else BlueDark
+                    color = if (deckWithStats.dueCardCount > 0) BluePrimary else NeutralDark.copy(alpha = 0.7f)
                 )
 
                 if (deckWithStats.dueCardCount > 0) {
                     Button(
                         onClick = onStudyClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = GreenDark,
+                            containerColor = BluePrimary,
                             contentColor = Color.White
-                        )
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Estudar")
                     }
@@ -296,8 +322,9 @@ fun DeckCard(
                     OutlinedButton(
                         onClick = onStudyClick,
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = GreenDark
-                        )
+                            contentColor = BluePrimary
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Revisar")
                     }
@@ -318,21 +345,26 @@ fun CreateDeckDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
-        titleContentColor = GrayDark,
-        textContentColor = GrayDark,
-        title = { Text("Criar Novo Baralho") },
+        titleContentColor = NeutralDark,
+        textContentColor = NeutralDark,
+        title = {
+            Text(
+                "Criar Novo Baralho",
+                color = BluePrimary
+            )
+        },
         text = {
             Column {
                 OutlinedTextField(
                     value = deckName,
                     onValueChange = { deckName = it },
-                    label = { Text("Nome do Baralho", color = GrayDark.copy(alpha = 0.7f)) },
+                    label = { Text("Nome do Baralho", color = NeutralDark.copy(alpha = 0.7f)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),
-                        focusedTextColor = GrayDark,
-                        unfocusedTextColor = GrayDark
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
                     )
                 )
 
@@ -341,13 +373,13 @@ fun CreateDeckDialog(
                 OutlinedTextField(
                     value = deckDescription,
                     onValueChange = { deckDescription = it },
-                    label = { Text("Descrição (Opcional)", color = GrayDark.copy(alpha = 0.7f)) },
+                    label = { Text("Descrição (Opcional)", color = NeutralDark.copy(alpha = 0.7f)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),
-                        focusedTextColor = GrayDark,
-                        unfocusedTextColor = GrayDark
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
                     )
                 )
             }
@@ -357,10 +389,11 @@ fun CreateDeckDialog(
                 onClick = { onCreate(deckName, deckDescription.ifEmpty { null }) },
                 enabled = deckName.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GreenDark,
+                    containerColor = BluePrimary,
                     contentColor = Color.White,
-                    disabledContainerColor = GreenDark.copy(alpha = 0.5f)
-                )
+                    disabledContainerColor = BluePrimary.copy(alpha = 0.5f)
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text("Criar")
             }
@@ -369,7 +402,7 @@ fun CreateDeckDialog(
             TextButton(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = BlueDark
+                    contentColor = MagentaSecondary
                 )
             ) {
                 Text("Cancelar")
@@ -377,4 +410,3 @@ fun CreateDeckDialog(
         }
     )
 }
-

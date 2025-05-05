@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +29,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +52,21 @@ import com.example.flashcardapp.data.entities.FlashcardType
 import com.example.flashcardapp.data.entities.StudyInfo
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
+
+// Definindo as cores do aplicativo
+val PrimaryBlue = Color(0xFF2962FF)
+val SecondaryMagenta = Color(0xFFE91E63)
+val PurpleAccent = Color(0xFF7C4DFF)
+val BackgroundColor = Color(0xFFF8F8F8)
+val TextPrimaryColor = Color(0xFF333333)
+val TextSecondaryColor = Color(0xFF757575)
+val CorrectAnswerColor = Color(0xFF06EC46)
+val IncorrectAnswerColor = Color(0xFFF6152C)
+
+// Definindo o gradiente para elementos específicos
+val AppGradient = Brush.linearGradient(
+    colors = listOf(SecondaryMagenta, PurpleAccent, PrimaryBlue)
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +102,8 @@ fun StudySessionScreen(
                         if (locationBased && locationsState.currentLocation != null)
                             "Estudo: ${locationsState.currentLocation!!.name}"
                         else
-                            "Sessão de Estudo"
+                            "Sessão de Estudo",
+                        color = Color.White
                     )
                 },
                 navigationIcon = {
@@ -98,7 +118,7 @@ fun StudySessionScreen(
                             ).show()
                         }
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
                     }
                 },
                 actions = {
@@ -106,10 +126,14 @@ fun StudySessionScreen(
                         Icon(
                             Icons.Default.LocationOn,
                             contentDescription = "Baseado em localização",
-                            modifier = Modifier.padding(end = 16.dp)
+                            modifier = Modifier.padding(end = 16.dp),
+                            tint = Color.White
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = PrimaryBlue
+                )
             )
         }
     ) { paddingValues ->
@@ -117,9 +141,13 @@ fun StudySessionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .padding(16.dp)
         ) {
             when {
-                studySessionState.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                studySessionState.isLoading -> CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = PrimaryBlue
+                )
                 studySessionState.isCompleted -> StudySessionCompleted(onBackClick = { navController.popBackStack() })
                 studySessionState.currentFlashcard != null -> FlashcardStudyContent(
                     flashcard = studySessionState.currentFlashcard!!,
@@ -159,22 +187,30 @@ fun FlashcardStudyContent(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Progress indicator com o gradiente
         LinearProgressIndicator(
             progress = { 1f - (remainingCards.toFloat() / (remainingCards + 1)) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 16.dp),
+            color = PrimaryBlue,
+            trackColor = Color(0xFFE0E0E0)
         )
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 4.dp
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -193,13 +229,17 @@ fun FlashcardStudyContent(
                             text = if (isAnswerRevealed) full else masked,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            modifier = Modifier.padding(bottom = 24.dp),
+                            color = TextPrimaryColor
                         )
 
                         if (!isAnswerRevealed) {
                             Button(
                                 onClick = { onRevealAnswer() },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PrimaryBlue
+                                )
                             ) {
                                 Text("Revelar resposta")
                             }
@@ -212,7 +252,7 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = Color.Black
+                            color = TextPrimaryColor
                         )
 
                         options.forEach { option ->
@@ -220,12 +260,14 @@ fun FlashcardStudyContent(
                             val isSelected = option == selectedOption
 
                             val bgColor = when {
-                                selectedOption != null && isCorrect -> Color(0xFF74F197)
-                                selectedOption != null && isSelected && !isCorrect -> Color(
-                                    0xC9EF3346
-                                )
+                                selectedOption != null && isCorrect -> CorrectAnswerColor
+                                selectedOption != null && isSelected && !isCorrect -> IncorrectAnswerColor
+                                else -> Color(0xFFEBEBEB)
+                            }
 
-                                else -> MaterialTheme.colorScheme.surface
+                            val textColor = when {
+                                selectedOption != null && (isCorrect || (isSelected && !isCorrect)) -> Color.White
+                                else -> TextPrimaryColor
                             }
 
                             Button(
@@ -240,7 +282,7 @@ fun FlashcardStudyContent(
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             ) {
-                                Text(option, color = Color.Black)
+                                Text(option, color = textColor)
                             }
                         }
                     }
@@ -251,14 +293,14 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = Color.Black
+                            color = TextPrimaryColor
                         )
 
                         if (!isAnswerRevealed) {
                             OutlinedTextField(
                                 value = userInput,
                                 onValueChange = { userInput = it },
-                                label = { Text("Sua resposta") },
+                                label = { Text("Sua resposta", color = TextSecondaryColor) },
                                 modifier = Modifier.fillMaxWidth()
                             )
 
@@ -270,7 +312,11 @@ fun FlashcardStudyContent(
                                     onRevealAnswer()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                enabled = userInput.isNotBlank()
+                                enabled = userInput.isNotBlank(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PrimaryBlue,
+                                    disabledContainerColor = Color(0xFFCCCCCC)
+                                )
                             ) {
                                 Text("Verificar")
                             }
@@ -278,7 +324,7 @@ fun FlashcardStudyContent(
                             val isCorrect =
                                 userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
                             val feedbackColor =
-                                if (isCorrect) Color(0xFF06EC46) else Color(0xFFF6152C)
+                                if (isCorrect) CorrectAnswerColor else IncorrectAnswerColor
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -293,7 +339,8 @@ fun FlashcardStudyContent(
                             Text(
                                 text = "Resposta correta: ${flashcard.answer}",
                                 style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                color = TextPrimaryColor
                             )
                         }
                     }
@@ -304,24 +351,33 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = Color.Black
+                            color = TextPrimaryColor
                         )
 
                         if (!isAnswerRevealed) {
                             Button(
                                 onClick = { onRevealAnswer() },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
                             ) {
                                 Text("Revelar resposta")
                             }
                         } else {
-                            Divider(modifier = Modifier.padding(vertical = 16.dp))
-                            Text("Resposta:", style = MaterialTheme.typography.titleSmall)
+                            Divider(
+                                modifier = Modifier.padding(vertical = 16.dp),
+                                color = Color(0xFFE0E0E0)
+                            )
+                            Text(
+                                "Resposta:",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = TextSecondaryColor
+                            )
                             Text(
                                 text = flashcard.answer,
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(top = 8.dp)
+                                modifier = Modifier.padding(top = 8.dp),
+                                color = TextPrimaryColor
                             )
                         }
                     }
@@ -337,7 +393,8 @@ fun FlashcardStudyContent(
             Text(
                 text = "O que achou dessa questão?",
                 style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
+                color = TextSecondaryColor
             )
 
             val algorithm = SpacedRepetitionAlgorithm()
@@ -370,19 +427,27 @@ fun FlashcardStudyContent(
                             text = "$formattedDate",
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            modifier = Modifier.padding(bottom = 4.dp),
+                            color = TextSecondaryColor
                         )
                         Button(
                             onClick = { onRateCard(rating) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = when (rating) {
-                                    0 -> MaterialTheme.colorScheme.errorContainer
-                                    1 -> MaterialTheme.colorScheme.primaryContainer
-                                    else -> MaterialTheme.colorScheme.tertiaryContainer
+                                    0 -> Color(0xFFFFF3F0) // Fundo vermelho claro para "Difícil"
+                                    1 -> Color(0xFFE8F0FF) // Fundo azul claro para "Bom"
+                                    else -> Color(0xFFF0FFF4) // Fundo verde claro para "Fácil"
                                 }
                             )
                         ) {
-                            Text(label, color = Color.Black)
+                            Text(
+                                label,
+                                color = when (rating) {
+                                    0 -> IncorrectAnswerColor.copy(alpha = 0.8f)
+                                    1 -> PrimaryBlue
+                                    else -> CorrectAnswerColor.copy(alpha = 0.8f)
+                                }
+                            )
                         }
                     }
                 }
@@ -400,19 +465,27 @@ fun StudySessionCompleted(onBackClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Sessão Concluída!", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Sessão Concluída!",
+            style = MaterialTheme.typography.headlineMedium,
+            color = PrimaryBlue
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             "Parabéns! Você completou todos os cartões disponíveis para revisão.",
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = TextSecondaryColor
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = onBackClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = PrimaryBlue
+            )
         ) {
             Text("Voltar")
         }
