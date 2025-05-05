@@ -211,7 +211,8 @@ fun FlashcardStudyContent(
                             text = flashcard.question,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            modifier = Modifier.padding(bottom = 24.dp),
+                            color = Color.Black
                         )
 
                         options.forEach { option ->
@@ -219,9 +220,9 @@ fun FlashcardStudyContent(
                             val isSelected = option == selectedOption
 
                             val bgColor = when {
-                                selectedOption != null && isCorrect -> Color(0xFFB9F6CA)
+                                selectedOption != null && isCorrect -> Color(0xFF74F197)
                                 selectedOption != null && isSelected && !isCorrect -> Color(
-                                    0xFFFFCDD2
+                                    0xC9EF3346
                                 )
 
                                 else -> MaterialTheme.colorScheme.surface
@@ -239,7 +240,7 @@ fun FlashcardStudyContent(
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             ) {
-                                Text(option)
+                                Text(option, color = Color.Black)
                             }
                         }
                     }
@@ -249,7 +250,8 @@ fun FlashcardStudyContent(
                             text = flashcard.question,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            modifier = Modifier.padding(bottom = 24.dp),
+                            color = Color.Black
                         )
 
                         if (!isAnswerRevealed) {
@@ -276,7 +278,7 @@ fun FlashcardStudyContent(
                             val isCorrect =
                                 userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
                             val feedbackColor =
-                                if (isCorrect) Color(0xFFB9F6CA) else Color(0xFFFFCDD2)
+                                if (isCorrect) Color(0xFF06EC46) else Color(0xFFF6152C)
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -301,7 +303,8 @@ fun FlashcardStudyContent(
                             text = flashcard.question,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            modifier = Modifier.padding(bottom = 24.dp),
+                            color = Color.Black
                         )
 
                         if (!isAnswerRevealed) {
@@ -332,7 +335,7 @@ fun FlashcardStudyContent(
             setCanNavigateBack(false)
 
             Text(
-                text = "Como você se saiu?",
+                text = "O que achou dessa questão?",
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -379,7 +382,7 @@ fun FlashcardStudyContent(
                                 }
                             )
                         ) {
-                            Text(label)
+                            Text(label, color = Color.Black)
                         }
                     }
                 }
