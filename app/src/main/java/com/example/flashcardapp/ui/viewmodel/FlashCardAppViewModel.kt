@@ -170,10 +170,18 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)
 
+            val now = System.currentTimeMillis()
+
+            // Obtem a localização atual de forma síncrona
+            val location = repository.getCurrentLocationSync()
+            val locationId = location?.let {
+                repository.getNearestLocation(it.latitude, it.longitude)?.locationId
+            }
+
             studySessionCards = if (deckId != null) {
-                repository.getDueFlashcardsForDeck(deckId).toMutableList()
+                repository.getDueFlashcardsForDeck(deckId, now, locationId).toMutableList()
             } else {
-                repository.getAllDueFlashcards().toMutableList()
+                repository.getAllDueFlashcards(now, locationId).toMutableList()
             }
 
             if (studySessionCards.isNotEmpty()) {
@@ -193,6 +201,7 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+
 
     fun revealAnswer() {
         _studySessionUiState.value = _studySessionUiState.value.copy(

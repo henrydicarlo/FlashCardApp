@@ -1,6 +1,10 @@
 package com.example.flashcardapp.data.entities
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 /**
  * Entidade de Flashcard
@@ -26,5 +30,6 @@ data class Flashcard(
     val options: String? = null,
     // Para flashcards do tipo CLOZE, pode armazenar o texto completo
     val fullText: String? = null,
-    val creationDate: Long = System.currentTimeMillis()
+    val creationDate: Long = System.currentTimeMillis(),
+    val createdLocationId: Long? = null
 )
