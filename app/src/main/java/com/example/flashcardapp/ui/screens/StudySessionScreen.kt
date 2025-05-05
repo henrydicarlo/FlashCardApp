@@ -193,8 +193,7 @@ fun FlashcardStudyContent(
                             text = if (isAnswerRevealed) full else masked,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 24.dp),
-                            color = Color.Black
+                            modifier = Modifier.padding(bottom = 24.dp)
                         )
 
                         if (!isAnswerRevealed) {
@@ -220,10 +219,11 @@ fun FlashcardStudyContent(
                             val isSelected = option == selectedOption
 
                             val bgColor = when {
-                                selectedOption != null && isCorrect -> Color(0xFF74F197)
+                                selectedOption != null && isCorrect -> Color(0xFFB9F6CA)
                                 selectedOption != null && isSelected && !isCorrect -> Color(
-                                    0xC9EF3346
+                                    0xFFFFCDD2
                                 )
+
                                 else -> MaterialTheme.colorScheme.surface
                             }
 
@@ -239,7 +239,7 @@ fun FlashcardStudyContent(
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             ) {
-                                Text(option, color = Color.Black)
+                                Text(option)
                             }
                         }
                     }
@@ -276,9 +276,7 @@ fun FlashcardStudyContent(
                             val isCorrect =
                                 userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
                             val feedbackColor =
-                                if (isCorrect) Color(0xFF06EC46) else Color(
-                                0xFFF6152C
-                            )
+                                if (isCorrect) Color(0xFFB9F6CA) else Color(0xFFFFCDD2)
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -334,10 +332,30 @@ fun FlashcardStudyContent(
             setCanNavigateBack(false)
 
             Text(
-                text = "O que achou dessa questão?",
+                text = "Como você se saiu?",
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+
+            val algorithm = SpacedRepetitionAlgorithm()
+
+            val now = System.currentTimeMillis()
+
+            val predictions = listOf(
+                0 to "Difícil",
+                1 to "Bom",
+                2 to "Fácil"
+            ).map { (rating, label) ->
+                val simulated = studyInfo.copy()
+                algorithm.updateStudyInfo(simulated, rating)
+                val daysUntilNextReview = ((simulated.nextReviewDate - now) / (1000 * 60 * 60 * 24)).toInt()
+                val readable = when (daysUntilNextReview) {
+                    0 -> "hoje"
+                    1 -> "1 dia"
+                    else -> "$daysUntilNextReview dias"
+                }
+                Triple(rating, label, readable)
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -361,7 +379,7 @@ fun FlashcardStudyContent(
                                 }
                             )
                         ) {
-                            Text(label, color = Color.Black)
+                            Text(label)
                         }
                     }
                 }
@@ -370,32 +388,30 @@ fun FlashcardStudyContent(
     }
 }
 
-    @Composable
-    fun StudySessionCompleted(onBackClick: () -> Unit) {
-        Column(
+@Composable
+fun StudySessionCompleted(onBackClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Sessão Concluída!", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "Parabéns! Você completou todos os cartões disponíveis para revisão.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onBackClick,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .height(56.dp)
         ) {
-            Text("Sessão Concluída!", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Parabéns! Você completou todos os cartões disponíveis para revisão.",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("Voltar")
-            }
+            Text("Voltar")
         }
     }
-
-
+}
