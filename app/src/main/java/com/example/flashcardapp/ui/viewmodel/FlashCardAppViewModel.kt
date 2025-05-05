@@ -4,20 +4,19 @@ package com.example.flashcardapp.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.flashcardapp.data.database.FlashcardAppDatabase
 import androidx.room.Room.databaseBuilder
+import com.example.flashcardapp.data.database.FlashcardAppDatabase
 import com.example.flashcardapp.data.entities.Deck
 import com.example.flashcardapp.data.entities.Flashcard
 import com.example.flashcardapp.data.entities.StudyLocation
 import com.example.flashcardapp.data.repository.FlashcardRepository
 import com.example.flashcardapp.services.LocationService
+import com.example.flashcardapp.services.SyncService
 import com.example.flashcardapp.ui.model.DeckListUiState
 import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.model.LocationsUiState
 import com.example.flashcardapp.ui.model.StudySessionUiState
 import com.example.flashcardapp.ui.model.UserStatsUiState
-import com.example.flashcardapp.services.SyncService
-import com.example.flashcardapp.ui.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -178,9 +177,12 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
 
             if (studySessionCards.isNotEmpty()) {
+                val studyInfo = repository.getStudyInfo(studySessionCards.first().flashcardId)
+
                 _studySessionUiState.value = StudySessionUiState(
                     currentFlashcard = studySessionCards.first(),
-                    remainingCards = studySessionCards.size,
+                    currentStudyInfo = studyInfo,
+                    remainingCards = studySessionCards.size - 1,
                     isLoading = false
                 )
             } else {
@@ -204,15 +206,18 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             repository.reviewFlashcard(currentCard.flashcardId, rating)
 
-            // Remove o cartão atual e avança
             if (studySessionCards.isNotEmpty()) {
                 studySessionCards.removeAt(0)
             }
 
             if (studySessionCards.isNotEmpty()) {
+                val nextFlashcard = studySessionCards.first()
+                val studyInfo = repository.getStudyInfo(nextFlashcard.flashcardId)
+
                 _studySessionUiState.value = StudySessionUiState(
-                    currentFlashcard = studySessionCards.first(),
-                    remainingCards = studySessionCards.size,
+                    currentFlashcard = nextFlashcard,
+                    currentStudyInfo = studyInfo,
+                    remainingCards = studySessionCards.size - 1,
                     isLoading = false
                 )
             } else {
@@ -223,6 +228,7 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+
 
     // Funções para localizações
 
