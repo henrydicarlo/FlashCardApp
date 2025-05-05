@@ -11,12 +11,15 @@ import com.example.flashcardapp.data.entities.StudyLocation
 import com.example.flashcardapp.data.entities.UserStats
 import com.example.flashcardapp.services.LocationService
 import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import kotlin.math.max
+
 
 /**
  * Repositório principal que gerencia todas as operações de dados
@@ -97,9 +100,45 @@ class FlashcardRepository(
     // Flashcard operations
     fun getFlashcardsByDeck(deckId: Long) = flashcardDao.getFlashcardsByDeck(deckId)
 
-    suspend fun getDueFlashcardsForDeck(deckId: Long) = flashcardDao.getDueFlashcardsForDeck(deckId)
+    suspend fun getDueFlashcardsForDeck(deckId: Long, now: Long, currentLocationId: Long?): List<Flashcard> {
+        val allDue = flashcardDao.getDueFlashcardsForDeck(deckId, now)
 
-    suspend fun getAllDueFlashcards() = flashcardDao.getAllDueFlashcards()
+        return if (currentLocationId == null) {
+            allDue
+        } else {
+            allDue.sortedBy {
+                if (it.createdLocationId == currentLocationId) 1 else 0
+            }
+        }
+    }
+
+    suspend fun getCurrentLocationSync(): Location? = withContext(Dispatchers.IO) {
+        val deferred = CompletableDeferred<Location?>()
+        locationService.getCurrentLocation { location ->
+            deferred.complete(location)
+        }
+        deferred.await()
+    }
+    suspend fun getAllDueFlashcards(now: Long, currentLocationId: Long?): List<Flashcard> {
+        val allDueCards = flashcardDao.getAllDueFlashcards(now)
+
+        return if (currentLocationId == null) {
+            allDueCards
+        } else {
+            // Separa os cards por localização
+            val (sameLocation, otherLocations) = allDueCards.partition {
+                it.createdLocationId == currentLocationId
+            }
+
+            // Diminui a chance dos da mesma localização (ex: 25% da lista)
+            val reducedSameLocation = sameLocation.shuffled().take((sameLocation.size * 0.25).toInt())
+
+            // Junta tudo e embaralha para não criar padrão
+            (otherLocations + reducedSameLocation).shuffled()
+        }
+    }
+
+
 
     suspend fun createBasicFlashcard(deckId: Long, question: String, answer: String): Long {
         var createdLocationId: Long? = null
