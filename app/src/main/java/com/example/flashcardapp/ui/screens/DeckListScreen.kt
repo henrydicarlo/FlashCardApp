@@ -20,8 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,6 +55,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.room.Room
+import com.example.flashcardapp.services.SyncService
 import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
@@ -141,6 +145,12 @@ fun DeckListScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { viewModel.sync() }) {
+                        Icon(Icons.Default.Sync, contentDescription = "Sync", tint = Color.White)
+                    }
+                    IconButton(onClick = { viewModel.downloadData() }) {
+                        Icon(Icons.Default.Download, contentDescription = "Sync", tint = Color.White)
+                    }
                     IconButton(onClick = { navController.navigate("stats") }) {
                         Icon(Icons.Default.BarChart, contentDescription = "Statistics", tint = Color.White)
                     }
