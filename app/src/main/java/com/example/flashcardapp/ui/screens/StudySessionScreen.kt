@@ -45,7 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.flashcardapp.data.entities.Flashcard
 import com.example.flashcardapp.data.entities.FlashcardType
+import com.example.flashcardapp.data.entities.StudyInfo
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
+import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,6 +123,7 @@ fun StudySessionScreen(
                 studySessionState.isCompleted -> StudySessionCompleted(onBackClick = { navController.popBackStack() })
                 studySessionState.currentFlashcard != null -> FlashcardStudyContent(
                     flashcard = studySessionState.currentFlashcard!!,
+                    studyInfo = studySessionState.currentStudyInfo!!,
                     isAnswerRevealed = studySessionState.isAnswerRevealed,
                     remainingCards = studySessionState.remainingCards,
                     onRevealAnswer = { viewModel.revealAnswer() },
@@ -135,10 +138,12 @@ fun StudySessionScreen(
     }
 }
 
+
 @Composable
 fun FlashcardStudyContent(
     flashcard: Flashcard,
     isAnswerRevealed: Boolean,
+    studyInfo: StudyInfo,
     remainingCards: Int,
     onRevealAnswer: () -> Unit,
     onRateCard: (Int) -> Unit,
@@ -268,8 +273,10 @@ fun FlashcardStudyContent(
                                 Text("Verificar")
                             }
                         } else {
-                            val isCorrect = userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
-                            val feedbackColor = if (isCorrect) Color(0xFF06EC46) else Color(
+                            val isCorrect =
+                                userInput.trim().equals(flashcard.answer.trim(), ignoreCase = true)
+                            val feedbackColor =
+                                if (isCorrect) Color(0xFF06EC46) else Color(
                                 0xFFF6152C
                             )
 
@@ -336,49 +343,59 @@ fun FlashcardStudyContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(
-                    onClick = { onRateCard(0) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-                ) { Text("Difícil", color = Color.Black) }
-
-                Button(
-                    onClick = { onRateCard(1) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                ) { Text("Bom", color = Color.Black) }
-
-                Button(
-                    onClick = { onRateCard(2) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-                ) { Text("Fácil", color = Color.Black) }
+                predictions.forEach { (rating, label, formattedDate) ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "$formattedDate",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Button(
+                            onClick = { onRateCard(rating) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = when (rating) {
+                                    0 -> MaterialTheme.colorScheme.errorContainer
+                                    1 -> MaterialTheme.colorScheme.primaryContainer
+                                    else -> MaterialTheme.colorScheme.tertiaryContainer
+                                }
+                            )
+                        ) {
+                            Text(label, color = Color.Black)
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-@Composable
-fun StudySessionCompleted(onBackClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Sessão Concluída!", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            "Parabéns! Você completou todos os cartões disponíveis para revisão.",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onBackClick,
+    @Composable
+    fun StudySessionCompleted(onBackClick: () -> Unit) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("Voltar")
+            Text("Sessão Concluída!", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Parabéns! Você completou todos os cartões disponíveis para revisão.",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            Button(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text("Voltar")
+            }
         }
     }
-}
+
+
