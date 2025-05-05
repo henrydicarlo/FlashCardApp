@@ -27,24 +27,18 @@ class SpacedRepetitionAlgorithm {
         studyInfo.lastDifficulty = rating
 
         when (rating) {
-            0 -> { // Falha completa
+            0 -> { // Errei
                 studyInfo.repetitions = 0
                 studyInfo.interval = 0
+                studyInfo.easeFactor = MIN_EASE_FACTOR
                 studyInfo.nextReviewDate = now + (6 * 60 * 60 * 1000) // 6 horas depois
             }
-            1 -> { // Difícil
-                studyInfo.easeFactor = max(MIN_EASE_FACTOR, studyInfo.easeFactor - 0.15)
-                updateInterval(studyInfo, 1.2)
-            }
-            2 -> { // Bom
+            1 -> { // Bom
                 studyInfo.easeFactor = max(MIN_EASE_FACTOR, studyInfo.easeFactor - 0.05)
                 updateInterval(studyInfo, 1.0)
             }
-            3 -> { // Fácil
-                updateInterval(studyInfo, 1.0)
-            }
-            4 -> { // Muito fácil
-                studyInfo.easeFactor = min(MAX_EASE_FACTOR, studyInfo.easeFactor + 0.15)
+            2 -> { // Fácil
+                studyInfo.easeFactor = min(MAX_EASE_FACTOR, studyInfo.easeFactor + 0.05)
                 updateInterval(studyInfo, 1.3)
             }
         }
@@ -54,10 +48,10 @@ class SpacedRepetitionAlgorithm {
         }
 
         if (locationId != null && !studyInfo.reviewLocations.split("|").contains(locationId.toString())) {
-            if (studyInfo.reviewLocations.isEmpty()) {
-                studyInfo.reviewLocations = locationId.toString()
+            studyInfo.reviewLocations = if (studyInfo.reviewLocations.isEmpty()) {
+                locationId.toString()
             } else {
-                studyInfo.reviewLocations += "|$locationId"
+                "${studyInfo.reviewLocations}|$locationId"
             }
         }
 
