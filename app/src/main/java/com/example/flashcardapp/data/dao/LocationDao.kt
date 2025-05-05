@@ -31,4 +31,14 @@ interface LocationDao {
             "(latitude - :lat) * (latitude - :lat) + " +
             "(longitude - :lng) * (longitude - :lng) ASC LIMIT 1")
     suspend fun getNearestLocation(lat: Double, lng: Double): StudyLocation?
+
+    @Query("SELECT * FROM locations ORDER BY name")
+    fun getAll(): List<StudyLocation>
+
+    @Query("DELETE FROM locations")
+    fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(locations: List<StudyLocation>)
+
 }

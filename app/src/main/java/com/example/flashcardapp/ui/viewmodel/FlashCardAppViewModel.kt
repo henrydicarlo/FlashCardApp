@@ -4,6 +4,8 @@ package com.example.flashcardapp.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.flashcardapp.data.database.FlashcardAppDatabase
+import androidx.room.Room.databaseBuilder
 import com.example.flashcardapp.data.entities.Deck
 import com.example.flashcardapp.data.entities.Flashcard
 import com.example.flashcardapp.data.entities.StudyLocation
@@ -14,6 +16,8 @@ import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.model.LocationsUiState
 import com.example.flashcardapp.ui.model.StudySessionUiState
 import com.example.flashcardapp.ui.model.UserStatsUiState
+import com.example.flashcardapp.services.SyncService
+import com.example.flashcardapp.ui.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +49,11 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
 
     // Flashcards para estudar na sessão atual
     private var studySessionCards = mutableListOf<Flashcard>()
+
+    // Estado para acompanhar o progresso da sincronização
+    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+    val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
+
 
     init {
         viewModelScope.launch {
@@ -289,5 +298,39 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
     }
 
 
+    private val syncService = SyncService(
+        context = application,
+        database = databaseBuilder(
+            application,
+            FlashcardAppDatabase::class.java,
+            "app_database"
+        ).build()
+    )
 
+    // Sincronização completa (enviar e receber dados)
+    fun sync() {
+        viewModelScope.launch {
+            _syncState.value = SyncState.Loading
+            val result = syncService.syncData()
+            _syncState.value = if (result) SyncState.Success else SyncState.Error
+        }
+    }
+
+    // Apenas baixar dados do servidor
+    fun downloadData() {
+        viewModelScope.launch {
+            _syncState.value = SyncState.Loading
+            val result = syncService.downloadAndSaveServerData()
+            _syncState.value = if (result) SyncState.Success else SyncState.Error
+        }
+    }
 }
+
+// Estados possíveis da sincronização
+sealed class SyncState {
+    object Idle : SyncState()
+    object Loading : SyncState()
+    object Success : SyncState()
+    object Error : SyncState()
+}
+
