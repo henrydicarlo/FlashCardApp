@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 
-// Cores do tema
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
@@ -55,16 +55,6 @@ private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos princip
 private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
 private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
 private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
-
-// Gradiente principal para elementos destacados
-private val GradientPrimary = Brush.horizontalGradient(
-    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
-)
-
-// Gradiente suave para fundos e elementos decorativos
-private val GradientBackground = Brush.verticalGradient(
-    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +67,7 @@ fun FlashcardCreateScreen(
     var formValid by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = NeutralLight,
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
                 title = {
@@ -90,13 +80,13 @@ fun FlashcardCreateScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BluePrimary,
+                    containerColor = Color.White,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 ),
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = BlueIcons)
                     }
                 }
             )
@@ -105,7 +95,7 @@ fun FlashcardCreateScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GradientBackground)
+                .background(Color.White)
                 .padding(paddingValues)
         ) {
             Column(

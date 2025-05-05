@@ -77,6 +77,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
@@ -88,13 +89,6 @@ private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
 private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
 private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
 
-private val GradientPrimary = Brush.horizontalGradient(
-    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
-)
-
-private val GradientBackground = Brush.verticalGradient(
-    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,13 +117,10 @@ fun DeckListScreen(
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
                         )
-
-                        // App name or empty text if you prefer
-                        Text("Itera", color = Color.White, style = MaterialTheme.typography.titleMedium)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BluePrimary,
+                    containerColor = Color.White,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
@@ -137,7 +128,7 @@ fun DeckListScreen(
                     // Stats card in a nice compact design
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = BluePrimary.copy(alpha = 0.3f)
+                            containerColor = BlueIcons
                         ),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.padding(end = 8.dp)
@@ -199,7 +190,7 @@ fun DeckListScreen(
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "More options",
-                            tint = Color.White
+                            tint = BlueIcons
                         )
                     }
 
@@ -214,7 +205,7 @@ fun DeckListScreen(
                                 Icon(
                                     Icons.Default.Refresh,
                                     contentDescription = "Sync",
-                                    tint = BluePrimary
+                                    tint = BlueIcons
                                 )
                             },
                             onClick = {
@@ -228,7 +219,7 @@ fun DeckListScreen(
                                 Icon(
                                     Icons.Default.Download,
                                     contentDescription = "Download",
-                                    tint = BluePrimary
+                                    tint = BlueIcons
                                 )
                             },
                             onClick = {
@@ -242,7 +233,7 @@ fun DeckListScreen(
                                 Icon(
                                     Icons.Default.BarChart,
                                     contentDescription = "Statistics",
-                                    tint = BluePrimary
+                                    tint = BlueIcons
                                 )
                             },
                             onClick = {
@@ -256,7 +247,7 @@ fun DeckListScreen(
                                 Icon(
                                     Icons.Default.LocationOn,
                                     contentDescription = "Locations",
-                                    tint = BluePrimary
+                                    tint = BlueIcons
                                 )
                             },
                             onClick = {
@@ -294,7 +285,7 @@ fun DeckListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(NeutralLight)
+                    .background(Color.White)
                     .padding(paddingValues)
             ) {
                 if (deckListState.isLoading) {
@@ -401,7 +392,7 @@ fun DeckCard(
                     Button(
                         onClick = onStudyClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = BluePrimary,
+                            containerColor = BlueIcons,
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(8.dp)

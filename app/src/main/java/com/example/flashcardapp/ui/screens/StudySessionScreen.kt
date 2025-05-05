@@ -56,6 +56,7 @@ import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
 
 // Definindo as cores do aplicativo
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
@@ -68,16 +69,6 @@ private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
 private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
 private val CorrectAnswerColor = Color(0xFF4CAF50)
 private val IncorrectAnswerColor = Color(0xFFE53935)
-
-// Gradiente principal para elementos destacados
-private val GradientPrimary = Brush.horizontalGradient(
-    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
-)
-
-// Gradiente suave para fundos e elementos decorativos
-private val GradientBackground = Brush.verticalGradient(
-    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +106,7 @@ fun StudySessionScreen(
                             "Estudo: ${locationsState.currentLocation!!.name}"
                         else
                             "Sessão de Estudo",
-                        color = Color.White
+                        color = NeutralDark
                     )
                 },
                 navigationIcon = {
@@ -130,7 +121,7 @@ fun StudySessionScreen(
                             ).show()
                         }
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = BlueIcons)
                     }
                 },
                 actions = {
@@ -144,10 +135,10 @@ fun StudySessionScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BluePrimary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = Color.White,
+                    titleContentColor = NeutralDark,
+                    navigationIconContentColor = BlueIcons,
+                    actionIconContentColor = BlueIcons
                 )
             )
         }
@@ -155,7 +146,7 @@ fun StudySessionScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GradientBackground)
+                .background(Color.White)
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
@@ -212,7 +203,7 @@ fun FlashcardStudyContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            color = BluePrimary,
+            color = BlueIcons,
             trackColor = NeutralLight
         )
 
@@ -250,7 +241,7 @@ fun FlashcardStudyContent(
                                 onClick = { onRevealAnswer() },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = BluePrimary
+                                    containerColor = BlueIcons
                                 ),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
@@ -317,11 +308,11 @@ fun FlashcardStudyContent(
                                 label = { Text("Sua resposta", color = NeutralDark.copy(alpha = 0.7f)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = BluePrimary,
+                                    focusedBorderColor = BlueIcons,
                                     unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
-                                    focusedLabelColor = BluePrimary,
+                                    focusedLabelColor = BlueIcons,
                                     unfocusedLabelColor = NeutralDark.copy(alpha = 0.7f),
-                                    cursorColor = BluePrimary
+                                    cursorColor = BlueIcons
                                 )
                             )
 

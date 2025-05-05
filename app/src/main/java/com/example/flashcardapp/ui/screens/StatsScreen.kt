@@ -42,6 +42,7 @@ import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
 
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
@@ -53,15 +54,6 @@ private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
 private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
 private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
 
-// Gradiente principal para elementos destacados
-private val GradientPrimary = Brush.horizontalGradient(
-    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
-)
-
-// Gradiente suave para fundos e elementos decorativos
-private val GradientBackground = Brush.verticalGradient(
-    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,11 +67,11 @@ fun StatsScreen(
         containerColor = NeutralLight,
         topBar = {
             TopAppBar(
-                title = { Text("Estatísticas de Estudo", color = Color.White) },
+                title = { Text("Estatísticas de Estudo", color = NeutralDark) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BluePrimary,
+                    containerColor = Color.White,
                     titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    navigationIconContentColor = BlueIcons
                 ),
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -92,7 +84,7 @@ fun StatsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GradientBackground) // Aplicando o gradiente de fundo
+                .background(Color.White)
                 .padding(paddingValues)
         ) {
             if (userStatsState.isLoading) {
@@ -165,7 +157,7 @@ fun StatsScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MagentaSecondary.copy(alpha = 1f)
+                                containerColor = BlueIcons
                             ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
@@ -176,7 +168,7 @@ fun StatsScreen(
                                 Text(
                                     text = "Melhor Sequência",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = NeutralLight
+                                    color = Color.White
                                 )
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -184,7 +176,7 @@ fun StatsScreen(
                                 Text(
                                     text = "${userStatsState.maxStreakDays} dia(s)",
                                     style = MaterialTheme.typography.displaySmall,
-                                    color = NeutralLight
+                                    color = Color.White
                                 )
                             }
                         }
