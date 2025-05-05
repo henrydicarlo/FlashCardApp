@@ -298,7 +298,7 @@ fun FlashcardCard(
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = "Excluir",
-                            tint = ErrorRed
+                            tint = MagentaSecondary
                         )
                     }
                 }
@@ -483,7 +483,7 @@ fun FlashcardCard(
                         showDeleteDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ErrorRed
+                        containerColor = MagentaSecondary,
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {

@@ -13,6 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,25 +32,36 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
 
+private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
+private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
+private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
+private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
+private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
+private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
+private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
+private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
 
-// Definindo as cores da nova paleta
-private val GreenPrimary = Color(0xFF4CAF50) // Verde principal
-private val GreenDark = Color(0xFF388E3C) // Verde escuro para elementos de destaque
-private val GreenLight = Color(0xFFC8E6C9) // Verde claro para fundos secundários
-private val BlueDark = Color(0xFF1A237E) // Azul profundo para contraste
-private val GreenPale = Color(0xFFE8F5E9) // Verde pálido para fundos
-private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos interativos
-private val GrayLight = Color(0xFFF5F5F5) // Cinza claro para áreas de texto
-private val GrayDark = Color(0xFF424242) // Cinza escuro para textos principais
-private val RedError = Color(0xFFEF5350) // Vermelho para erros
-private val BlueInfo = Color(0xFF42A5F5) // Azul para informações
+// Gradiente principal para elementos destacados
+private val GradientPrimary = Brush.horizontalGradient(
+    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
+)
+
+// Gradiente suave para fundos e elementos decorativos
+private val GradientBackground = Brush.verticalGradient(
+    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,12 +72,12 @@ fun StatsScreen(
     val userStatsState by viewModel.userStatsUiState.collectAsState()
 
     Scaffold(
-        containerColor = GreenPale,
+        containerColor = NeutralLight,
         topBar = {
             TopAppBar(
                 title = { Text("Estatísticas de Estudo", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GreenPrimary,
+                    containerColor = BluePrimary,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 ),
@@ -78,13 +92,13 @@ fun StatsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GreenPale)
+                .background(GradientBackground) // Aplicando o gradiente de fundo
                 .padding(paddingValues)
         ) {
             if (userStatsState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = GreenDark
+                    color = BluePrimary
                 )
             } else {
                 Column(
@@ -95,79 +109,82 @@ fun StatsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Dias consecutivos
-                    StatsCard(
-                        title = "Dias Consecutivos",
+                    StatsCardModern(
+                        title = "Sequência de Dias",
                         value = userStatsState.streakDays.toString(),
-                        subtitle = "Melhor sequência: ${userStatsState.maxStreakDays} dias",
-                        valueColor = AmberAccent
+                        valueColor = MagentaSecondary, // Usando uma cor vibrante
+                        unit = " dias",
+                        description = "Sua sequência atual de estudo",
+                        icon = Icons.Filled.CalendarMonth,
+                        backgroundColor = Color.White, // Fundo completamente branco agora
+                        textColor = NeutralDark
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Taxa de acerto
-                    StatsCard(
+                    StatsCardModern(
                         title = "Taxa de Acertos",
-                        value = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
-                        subtitle = "Continue melhorando!",
-                        valueColor = GreenDark
+                        value = "${(userStatsState.correctAnswerRate * 100).roundToInt()}",
+                        valueColor = BluePrimary, // Outra cor vibrante
+                        unit = "%",
+                        description = "Seu desempenho geral",
+                        icon = Icons.Filled.CheckCircle,
+                        backgroundColor = Color.White,
+                        textColor = NeutralDark
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Total de dias estudados
-                    StatsCard(
+                    StatsCardModern(
                         title = "Total de Dias Estudados",
                         value = userStatsState.totalStudyDays.toString(),
-                        subtitle = "Sua jornada de aprendizado",
-                        valueColor = BlueInfo
+                        valueColor = PurpleTransition, // Mais uma cor da paleta
+                        unit = " dias",
+                        description = "Seu tempo total de aprendizado",
+                        icon = Icons.Filled.Timeline,
+                        backgroundColor = Color.White,
+                        textColor = NeutralDark
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
-                        text = "Mantenha sua rotina de estudos para resultados melhores!",
+                        text = "Continue avançando em sua jornada de aprendizado!",
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
-                        color = GrayDark
+                        color = NeutralDark
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (userStatsState.streakDays > 0) {
+                    if (userStatsState.maxStreakDays > 0) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = GreenDark
+                                containerColor = MagentaSecondary.copy(alpha = 0.8f)
                             ),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Sequência Atual",
+                                    text = "Melhor Sequência",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White
+                                    color = NeutralLight
                                 )
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
-                                    text = "${userStatsState.streakDays} dias",
+                                    text = "${userStatsState.maxStreakDays} dia(s)",
                                     style = MaterialTheme.typography.displaySmall,
-                                    color = AmberAccent
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Text(
-                                    text = "Continue estudando para manter sua sequência!",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center
+                                    color = NeutralLight
                                 )
                             }
                         }
@@ -179,16 +196,21 @@ fun StatsScreen(
 }
 
 @Composable
-fun StatsCard(
+fun StatsCardModern(
     title: String,
     value: String,
-    subtitle: String,
-    valueColor: Color
+    valueColor: Color,
+    unit: String = "",
+    description: String,
+    icon: ImageVector? = null,
+    backgroundColor: Color,
+    textColor: Color
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(8.dp)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -196,26 +218,32 @@ fun StatsCard(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = valueColor,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = GrayDark
+                color = textColor.copy(alpha = 0.9f),
+                textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineLarge,
-                color = valueColor
-            )
-
             Spacer(modifier = Modifier.height(4.dp))
-
             Text(
-                text = subtitle,
+                text = "$value$unit",
+                style = MaterialTheme.typography.headlineLarge,
+                color = valueColor,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = GrayDark.copy(alpha = 0.8f),
+                color = textColor.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
         }

@@ -68,7 +68,6 @@ import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
 
-// Definindo as cores da nova paleta
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários

@@ -2,6 +2,7 @@ package com.example.flashcardapp.ui.screens
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -54,18 +55,28 @@ import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
 
 // Definindo as cores do aplicativo
-val PrimaryBlue = Color(0xFF2962FF)
-val SecondaryMagenta = Color(0xFFE91E63)
-val PurpleAccent = Color(0xFF7C4DFF)
-val BackgroundColor = Color(0xFFF8F8F8)
-val TextPrimaryColor = Color(0xFF333333)
-val TextSecondaryColor = Color(0xFF757575)
-val CorrectAnswerColor = Color(0xFF06EC46)
-val IncorrectAnswerColor = Color(0xFFF6152C)
+private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
+private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
+private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
+private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
+private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
+private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
+private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
+private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
+private val CorrectAnswerColor = Color(0xFF4CAF50)
+private val IncorrectAnswerColor = Color(0xFFE53935)
 
-// Definindo o gradiente para elementos específicos
-val AppGradient = Brush.linearGradient(
-    colors = listOf(SecondaryMagenta, PurpleAccent, PrimaryBlue)
+// Gradiente principal para elementos destacados
+private val GradientPrimary = Brush.horizontalGradient(
+    colors = listOf(MagentaSecondary, PurpleTransition, BluePrimary)
+)
+
+// Gradiente suave para fundos e elementos decorativos
+private val GradientBackground = Brush.verticalGradient(
+    colors = listOf(BlueLight.copy(alpha = 0.8f), MagentaLight.copy(alpha = 0.3f))
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,6 +106,7 @@ fun StudySessionScreen(
     }
 
     Scaffold(
+        containerColor = NeutralLight,
         topBar = {
             TopAppBar(
                 title = {
@@ -132,7 +144,10 @@ fun StudySessionScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PrimaryBlue
+                    containerColor = BluePrimary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         }
@@ -140,13 +155,14 @@ fun StudySessionScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(GradientBackground)
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
             when {
                 studySessionState.isLoading -> CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = PrimaryBlue
+                    color = BluePrimary
                 )
                 studySessionState.isCompleted -> StudySessionCompleted(onBackClick = { navController.popBackStack() })
                 studySessionState.currentFlashcard != null -> FlashcardStudyContent(
@@ -190,27 +206,23 @@ fun FlashcardStudyContent(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Progress indicator com o gradiente
+        // Progress indicator
         LinearProgressIndicator(
             progress = { 1f - (remainingCards.toFloat() / (remainingCards + 1)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            color = PrimaryBlue,
-            trackColor = Color(0xFFE0E0E0)
+            color = BluePrimary,
+            trackColor = NeutralLight
         )
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
-            )
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -230,7 +242,7 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = TextPrimaryColor
+                            color = NeutralDark
                         )
 
                         if (!isAnswerRevealed) {
@@ -238,8 +250,9 @@ fun FlashcardStudyContent(
                                 onClick = { onRevealAnswer() },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = PrimaryBlue
-                                )
+                                    containerColor = BluePrimary
+                                ),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text("Revelar resposta")
                             }
@@ -252,7 +265,7 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = TextPrimaryColor
+                            color = NeutralDark
                         )
 
                         options.forEach { option ->
@@ -262,12 +275,12 @@ fun FlashcardStudyContent(
                             val bgColor = when {
                                 selectedOption != null && isCorrect -> CorrectAnswerColor
                                 selectedOption != null && isSelected && !isCorrect -> IncorrectAnswerColor
-                                else -> Color(0xFFEBEBEB)
+                                else -> BlueLight
                             }
 
                             val textColor = when {
                                 selectedOption != null && (isCorrect || (isSelected && !isCorrect)) -> Color.White
-                                else -> TextPrimaryColor
+                                else -> NeutralDark
                             }
 
                             Button(
@@ -280,7 +293,8 @@ fun FlashcardStudyContent(
                                 colors = ButtonDefaults.buttonColors(containerColor = bgColor),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
+                                    .padding(vertical = 4.dp),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(option, color = textColor)
                             }
@@ -293,15 +307,22 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = TextPrimaryColor
+                            color = NeutralDark
                         )
 
                         if (!isAnswerRevealed) {
                             OutlinedTextField(
                                 value = userInput,
                                 onValueChange = { userInput = it },
-                                label = { Text("Sua resposta", color = TextSecondaryColor) },
-                                modifier = Modifier.fillMaxWidth()
+                                label = { Text("Sua resposta", color = NeutralDark.copy(alpha = 0.7f)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = BluePrimary,
+                                    unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                                    focusedLabelColor = BluePrimary,
+                                    unfocusedLabelColor = NeutralDark.copy(alpha = 0.7f),
+                                    cursorColor = BluePrimary
+                                )
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -314,9 +335,10 @@ fun FlashcardStudyContent(
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = userInput.isNotBlank(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = PrimaryBlue,
-                                    disabledContainerColor = Color(0xFFCCCCCC)
-                                )
+                                    containerColor = BluePrimary,
+                                    disabledContainerColor = NeutralDark.copy(alpha = 0.3f)
+                                ),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text("Verificar")
                             }
@@ -340,7 +362,7 @@ fun FlashcardStudyContent(
                                 text = "Resposta correta: ${flashcard.answer}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center,
-                                color = TextPrimaryColor
+                                color = NeutralDark
                             )
                         }
                     }
@@ -351,34 +373,48 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
-                            color = TextPrimaryColor
+                            color = NeutralDark
                         )
 
                         if (!isAnswerRevealed) {
                             Button(
                                 onClick = { onRevealAnswer() },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text("Revelar resposta")
                             }
                         } else {
                             Divider(
                                 modifier = Modifier.padding(vertical = 16.dp),
-                                color = Color(0xFFE0E0E0)
+                                color = NeutralDark.copy(alpha = 0.1f)
                             )
-                            Text(
-                                "Resposta:",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = TextSecondaryColor
-                            )
-                            Text(
-                                text = flashcard.answer,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(top = 8.dp),
-                                color = TextPrimaryColor
-                            )
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = BlueLight
+                                ),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = "Resposta:",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = BlueDark
+                                    )
+
+                                    Text(
+                                        text = flashcard.answer,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = NeutralDark,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -394,7 +430,7 @@ fun FlashcardStudyContent(
                 text = "O que achou dessa questão?",
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(bottom = 8.dp),
-                color = TextSecondaryColor
+                color = NeutralDark.copy(alpha = 0.7f)
             )
 
             val algorithm = SpacedRepetitionAlgorithm()
@@ -428,23 +464,24 @@ fun FlashcardStudyContent(
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 4.dp),
-                            color = TextSecondaryColor
+                            color = NeutralDark.copy(alpha = 0.7f)
                         )
                         Button(
                             onClick = { onRateCard(rating) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = when (rating) {
-                                    0 -> Color(0xFFFFF3F0) // Fundo vermelho claro para "Difícil"
-                                    1 -> Color(0xFFE8F0FF) // Fundo azul claro para "Bom"
-                                    else -> Color(0xFFF0FFF4) // Fundo verde claro para "Fácil"
+                                    0 -> MagentaLight
+                                    1 -> BlueLight
+                                    else -> Color(0xFFF0FFF4) // Verde claro
                                 }
-                            )
+                            ),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
                                 label,
                                 color = when (rating) {
-                                    0 -> IncorrectAnswerColor.copy(alpha = 0.8f)
-                                    1 -> PrimaryBlue
+                                    0 -> MagentaSecondary
+                                    1 -> BluePrimary
                                     else -> CorrectAnswerColor.copy(alpha = 0.8f)
                                 }
                             )
@@ -465,29 +502,48 @@ fun StudySessionCompleted(onBackClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            "Sessão Concluída!",
-            style = MaterialTheme.typography.headlineMedium,
-            color = PrimaryBlue
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            "Parabéns! Você completou todos os cartões disponíveis para revisão.",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = TextSecondaryColor
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onBackClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = PrimaryBlue
-            )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Text("Voltar")
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "Sessão Concluída!",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = BluePrimary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    "Parabéns! Você completou todos os cartões disponíveis para revisão.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = NeutralDark.copy(alpha = 0.7f)
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = onBackClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MagentaSecondary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Voltar")
+                }
+            }
         }
     }
 }
