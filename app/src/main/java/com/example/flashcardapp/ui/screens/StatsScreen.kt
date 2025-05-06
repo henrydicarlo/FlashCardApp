@@ -47,7 +47,7 @@ private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaq
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
 private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
-private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para acento
 private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
 private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
 private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
@@ -104,11 +104,11 @@ fun StatsScreen(
                     StatsCardModern(
                         title = "Sequência de Dias",
                         value = userStatsState.streakDays.toString(),
-                        valueColor = MagentaSecondary, // Usando uma cor vibrante
+                        valueColor = MagentaSecondary,
                         unit = " dias",
                         description = "Sua sequência atual de estudo",
                         icon = Icons.Filled.CalendarMonth,
-                        backgroundColor = Color.White, // Fundo completamente branco agora
+                        backgroundColor = Color.White,
                         textColor = NeutralDark
                     )
 
@@ -118,7 +118,7 @@ fun StatsScreen(
                     StatsCardModern(
                         title = "Taxa de Acertos",
                         value = "${(userStatsState.correctAnswerRate * 100).roundToInt()}",
-                        valueColor = BluePrimary, // Outra cor vibrante
+                        valueColor = BluePrimary,
                         unit = "%",
                         description = "Seu desempenho geral",
                         icon = Icons.Filled.CheckCircle,
@@ -132,7 +132,7 @@ fun StatsScreen(
                     StatsCardModern(
                         title = "Total de Dias Estudados",
                         value = userStatsState.totalStudyDays.toString(),
-                        valueColor = PurpleTransition, // Mais uma cor da paleta
+                        valueColor = PurpleTransition,
                         unit = " dias",
                         description = "Seu tempo total de aprendizado",
                         icon = Icons.Filled.Timeline,

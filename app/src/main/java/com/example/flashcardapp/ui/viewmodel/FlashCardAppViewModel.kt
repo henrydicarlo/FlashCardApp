@@ -1,6 +1,5 @@
 package com.example.flashcardapp.ui.viewmodel
 
-
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -151,8 +150,6 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-
-    // Adicionado
     suspend fun getAllFlashcardsForDeck(deckId: Long): List<Flashcard> {
         return repository.getFlashcardsByDeck(deckId).first()
     }
@@ -171,20 +168,20 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
 
             val now = System.currentTimeMillis()
 
-            // Obtem a localização atual de forma síncrona
+            // Pega a localização atual de forma síncrona
             val location = repository.getCurrentLocationSync()
             val locationId = location?.let {
                 repository.getNearestLocation(it.latitude, it.longitude)?.locationId
             }
 
-            // Tenta obter os cards devidos primeiro
+            // Tenta puxar os cards devidos primeiro
             studySessionCards = if (deckId != null) {
                 repository.getDueFlashcardsForDeck(deckId, now, locationId).toMutableList()
             } else {
                 repository.getAllDueFlashcards(now, locationId).toMutableList()
             }
 
-            // Se não houver cards devidos, obtenha todos os cards do deck
+            // Se não houver cards devidos, puxa todos os cards do deck
             if (studySessionCards.isEmpty() && deckId != null) {
                 studySessionCards = repository.getFlashcardsByDeck(deckId).first().toMutableList()
             }

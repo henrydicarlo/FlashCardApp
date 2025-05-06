@@ -55,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -75,7 +74,7 @@ private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaq
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
 private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
-private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para acentos
 private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
 private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
 private val ErrorRed = Color(0xFFE53935) // Vermelho para erros

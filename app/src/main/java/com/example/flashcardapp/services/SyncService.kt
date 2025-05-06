@@ -97,7 +97,7 @@ class SyncService(
             // Atualiza o banco do aplicativo
             database.runInTransaction {
                 try {
-                    // Clear existing data
+                    // Limpar dados existentes
                     database.deckDao().deleteAll()
                     database.flashcardDao().deleteAll()
                     database.studyInfoDao().deleteAll()

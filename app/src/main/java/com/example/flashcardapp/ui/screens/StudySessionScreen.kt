@@ -42,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -54,14 +53,13 @@ import com.example.flashcardapp.data.entities.StudyInfo
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
 
-// Definindo as cores do aplicativo
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
 private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
 private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
 private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
-private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para acento
 private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
 private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
 private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
@@ -197,7 +195,7 @@ fun FlashcardStudyContent(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Progress indicator
+        // Indicador de progresso
         LinearProgressIndicator(
             progress = { 1f - (remainingCards.toFloat() / (remainingCards + 1)) },
             modifier = Modifier

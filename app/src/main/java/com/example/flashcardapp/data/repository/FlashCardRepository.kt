@@ -37,7 +37,7 @@ class FlashcardRepository(
     private val spacedRepetition = SpacedRepetitionAlgorithm()
     private val locationService = LocationService(application)
 
-    // UserStats operations
+    // Operações Estatísticas
     val userStats: Flow<UserStats> = userStatsDao.getUserStats()
 
     suspend fun initializeUserStats() {
@@ -83,7 +83,7 @@ class FlashcardRepository(
         )
     }
 
-    // Deck operations
+    // Operações do Deck
     fun getAllDecks() = deckDao.getAllDecks()
 
     fun getCardCountForDeck(deckId: Long) = deckDao.getCardCountForDeck(deckId)
@@ -97,7 +97,7 @@ class FlashcardRepository(
 
     suspend fun deleteDeck(deck: Deck) = deckDao.deleteDeck(deck)
 
-    // Flashcard operations
+    // Operações dos Flashcards
     fun getFlashcardsByDeck(deckId: Long) = flashcardDao.getFlashcardsByDeck(deckId)
 
     suspend fun getDueFlashcardsForDeck(deckId: Long, now: Long, currentLocationId: Long?): List<Flashcard> {
@@ -138,8 +138,6 @@ class FlashcardRepository(
         }
     }
 
-
-
     suspend fun createBasicFlashcard(deckId: Long, question: String, answer: String): Long {
         var createdLocationId: Long? = null
 
@@ -168,7 +166,6 @@ class FlashcardRepository(
         studyInfoDao.insertOrUpdateStudyInfo(StudyInfo(flashcardId = flashcardId))
         return flashcardId
     }
-
 
 
     suspend fun createQuizFlashcard(deckId: Long, question: String, answer: String, options: List<String>): Long {
@@ -254,7 +251,7 @@ class FlashcardRepository(
 
     suspend fun deleteFlashcard(flashcard: Flashcard) = flashcardDao.deleteFlashcard(flashcard)
 
-    // Study and review operations
+    // Operações de Estudo e Revisão
     suspend fun getStudyInfo(flashcardId: Long) = studyInfoDao.getStudyInfo(flashcardId)
 
     suspend fun reviewFlashcard(flashcardId: Long, rating: Int) {
@@ -289,7 +286,7 @@ class FlashcardRepository(
         updateStreakStats()
     }
 
-    // Location operations
+    // Operações de Local
     fun getAllLocations() = locationDao.getAllLocations()
 
     suspend fun getLocationCount() = locationDao.getLocationCount()

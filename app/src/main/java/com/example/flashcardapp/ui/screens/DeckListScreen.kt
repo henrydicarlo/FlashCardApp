@@ -81,7 +81,7 @@ private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaq
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
 private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
-private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para acentos
 private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
 private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
 private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
@@ -95,7 +95,7 @@ fun DeckListScreen(
     navController: NavController,
     viewModel: FlashcardAppViewModel
 ) {
-    // Adicionar este bloco para atualizar a lista toda vez que a tela for composta
+    // Bloco para atualizar a lista toda vez que a tela for composta
     LaunchedEffect(true) {
         viewModel.refreshDeckList()
     }
@@ -133,7 +133,6 @@ fun DeckListScreen(
                     actionIconContentColor = Color.White
                 ),
                 actions = {
-                    // Stats card in a nice compact design
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = BlueIcons
@@ -146,7 +145,7 @@ fun DeckListScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Streak days with flame icon
+                            // Dias seguidos com ícone de chamas
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -172,7 +171,7 @@ fun DeckListScreen(
                                     .background(Color.White.copy(alpha = 0.3f))
                             )
 
-                            // Correct answer rate
+                            //
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -192,7 +191,7 @@ fun DeckListScreen(
                         }
                     }
 
-                    // Menu with all options
+                    // Menu com todas as opções
                     var showMenu by remember { mutableStateOf(false) }
                     IconButton(onClick = { showMenu = !showMenu }) {
                         Icon(
@@ -218,20 +217,6 @@ fun DeckListScreen(
                             },
                             onClick = {
                                 viewModel.sync()
-                                showMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Baixar dados") },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Download,
-                                    contentDescription = "Download",
-                                    tint = BlueIcons
-                                )
-                            },
-                            onClick = {
-                                viewModel.downloadData()
                                 showMenu = false
                             }
                         )
@@ -480,16 +465,13 @@ fun DeckCard(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
-                // Add a clickable modifier for long press - not adding it directly to Card
                 .background(Color.White)
-                .padding(2.dp) // Add some padding to make sure it's clickable
+                .padding(2.dp)
         ) {
-            // Long press detector using a Box
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp) // Height for long press area
-                // Add long press handling here
+                    .height(40.dp)
             ) {
                 // Título com Destaque Colorido
                 Row(

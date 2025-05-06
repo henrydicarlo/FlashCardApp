@@ -36,7 +36,7 @@ private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaq
 private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
 private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
 private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
-private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para acento
 private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
 private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
 private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
@@ -56,26 +56,26 @@ fun LocationScreen(
     val locationsUiState by viewModel.locationsUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Dialog states
+    // Estados para dialogos
     var showAddLocationDialog by remember { mutableStateOf(false) }
     var showEditLocationDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf<StudyLocation?>(null) }
 
-    // Input fields for add/edit dialog
+    // Campos de adicionar e editar
     var locationName by remember { mutableStateOf("") }
     var editingLocation by remember { mutableStateOf<StudyLocation?>(null) }
 
-    // Temporary location coordinates
+    // Coordenadas temporárias
     var tempLatitude by remember { mutableStateOf(0.0) }
     var tempLongitude by remember { mutableStateOf(0.0) }
 
-    // Permission launcher
+    // Permissão
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            // When permission is granted, proceed
+            // Quando a permissão for concedida prossiga
             locationService.getCurrentLocation { location ->
                 if (location != null) {
                     locationName = ""
@@ -83,14 +83,14 @@ fun LocationScreen(
                     tempLongitude = location.longitude
                     showAddLocationDialog = true
                 } else {
-                    // Show error message
+                    // Mensagem de erro
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar("Não foi possível obter a localização atual")
                     }
                 }
             }
         } else {
-            // Show message about permission denial
+            // Mensagem da necessidade de permissão
             coroutineScope.launch {
                 snackbarHostState.showSnackbar("Permissão de localização é necessária para adicionar a localização atual")
             }
@@ -118,13 +118,13 @@ fun LocationScreen(
             if (locationsUiState.canAddMore) {
                 FloatingActionButton(
                     onClick = {
-                        // Check location permission before proceeding
+                        // Confirmar permissão antes
                         when (PackageManager.PERMISSION_GRANTED) {
                             ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.ACCESS_FINE_LOCATION
                             ) -> {
-                                // Get current location and show dialog
+                                // Pegar a localização atual
                                 locationService.getCurrentLocation { location ->
                                     if (location != null) {
                                         locationName = ""
@@ -139,7 +139,6 @@ fun LocationScreen(
                                 }
                             }
                             else -> {
-                                // Request permission
                                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                             }
                         }
@@ -192,7 +191,7 @@ fun LocationScreen(
                 }
             }
 
-            // Add Location Dialog
+            // Adicionar local
             if (showAddLocationDialog) {
                 LocationDialog(
                     title = "Adicionar Localização",
@@ -212,7 +211,7 @@ fun LocationScreen(
                 )
             }
 
-            // Edit Location Dialog
+            // Editar local
             if (showEditLocationDialog && editingLocation != null) {
                 LocationDialog(
                     title = "Editar Localização",
@@ -236,7 +235,7 @@ fun LocationScreen(
                 )
             }
 
-// Delete Confirmation Dialog
+            // Deletar
             if (showDeleteConfirmDialog && currentLocation != null) {
                 AlertDialog(
                     onDismissRequest = { showDeleteConfirmDialog = false },
