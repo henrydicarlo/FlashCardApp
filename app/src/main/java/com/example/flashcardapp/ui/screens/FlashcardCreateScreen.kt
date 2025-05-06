@@ -72,11 +72,11 @@ fun FlashcardCreateScreen(
             TopAppBar(
                 title = {
                     when (type) {
-                        "BASIC" -> Text("Criar Flashcard Básico", color = Color.White)
-                        "QUIZ" -> Text("Criar Flashcard de Quiz", color = Color.White)
-                        "CLOZE" -> Text("Criar Flashcard Cloze", color = Color.White)
-                        "INPUT" -> Text("Criar Flashcard de Entrada", color = Color.White)
-                        else -> Text("Criar Flashcard", color = Color.White)
+                        "BASIC" -> Text("Criar Flashcard Básico", color = NeutralDark)
+                        "QUIZ" -> Text("Criar Flashcard de Quiz", color = NeutralDark)
+                        "CLOZE" -> Text("Criar Flashcard Cloze", color = NeutralDark)
+                        "INPUT" -> Text("Criar Flashcard de Entrada", color = NeutralDark)
+                        else -> Text("Criar Flashcard", color = NeutralDark)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
