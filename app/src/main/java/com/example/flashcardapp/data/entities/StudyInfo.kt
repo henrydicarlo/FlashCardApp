@@ -1,10 +1,12 @@
 package com.example.flashcardapp.data.entities
 
 import androidx.room.*
+import kotlinx.serialization.Serializable
 
 /**
  * Entidade para informações de estudo de flashcard
  */
+@Serializable
 @Entity(tableName = "study_info",
     foreignKeys = [
         ForeignKey(

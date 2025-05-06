@@ -320,11 +320,7 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
 
     private val syncService = SyncService(
         context = application,
-        database = databaseBuilder(
-            application,
-            FlashcardAppDatabase::class.java,
-            "app_database"
-        ).build()
+        database =   FlashcardAppDatabase.getDatabase(application)
     )
 
     // Sincronização completa (enviar e receber dados)
