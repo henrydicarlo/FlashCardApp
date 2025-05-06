@@ -1,14 +1,22 @@
 package com.example.flashcardapp.ui.viewmodel
 
+
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Room.databaseBuilder
+import com.example.flashcardapp.data.database.FlashcardAppDatabase
 import com.example.flashcardapp.data.entities.Deck
 import com.example.flashcardapp.data.entities.Flashcard
 import com.example.flashcardapp.data.entities.StudyLocation
 import com.example.flashcardapp.data.repository.FlashcardRepository
 import com.example.flashcardapp.services.LocationService
-import com.example.flashcardapp.ui.model.*
+import com.example.flashcardapp.services.SyncService
+import com.example.flashcardapp.ui.model.DeckListUiState
+import com.example.flashcardapp.ui.model.DeckWithStats
+import com.example.flashcardapp.ui.model.LocationsUiState
+import com.example.flashcardapp.ui.model.StudySessionUiState
+import com.example.flashcardapp.ui.model.UserStatsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,11 +49,13 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
     // Flashcards para estudar na sessão atual
     private var studySessionCards = mutableListOf<Flashcard>()
 
+    // Estado para acompanhar o progresso da sincronização
+    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+    val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
+
+
     init {
         viewModelScope.launch {
-            // Sincroniza dados com a API
-            repository.syncAllData()
-
             // Inicializa estatísticas do usuário se necessário
             repository.initializeUserStats()
 
@@ -89,43 +99,20 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
         }
 
-        // Carrega localizações e inicia monitoramento de localização atual
+        // Carrega localizações
         viewModelScope.launch {
             repository.getAllLocations().collect { locationList ->
-                // Atualiza a localização atual sempre que a lista de localizações for atualizada
-                locationService.getCurrentLocation { location ->
-                    if (location != null) {
-                        viewModelScope.launch {
-                            val nearestLocation = repository.getNearestLocation(
-                                location.latitude,
-                                location.longitude
-                            )
-
-                            _locationsUiState.value = LocationsUiState(
-                                locations = locationList,
-                                currentLocation = nearestLocation,
-                                canAddMore = locationList.size < 7,
-                                isLoading = false
-                            )
-
-                            // Atualiza o estado da sessão de estudo com a localização atual
-                            _studySessionUiState.value = _studySessionUiState.value.copy(
-                                currentLocation = nearestLocation
-                            )
-                        }
-                    } else {
-                        _locationsUiState.value = LocationsUiState(
-                            locations = locationList,
-                            canAddMore = locationList.size < 7,
-                            isLoading = false
-                        )
-                    }
-                }
+                _locationsUiState.value = LocationsUiState(
+                    locations = locationList,
+                    canAddMore = locationList.size < 7,
+                    isLoading = false
+                )
             }
         }
     }
 
     // Funções para gerenciamento de baralhos
+
     fun createDeck(name: String, description: String? = null) {
         viewModelScope.launch {
             repository.createDeck(name, description)
@@ -139,6 +126,7 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
     }
 
     // Funções para gerenciamento de flashcards
+
     fun createBasicFlashcard(deckId: Long, question: String, answer: String) {
         viewModelScope.launch {
             repository.createBasicFlashcard(deckId, question, answer)
@@ -163,6 +151,8 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+
+    // Adicionado
     suspend fun getAllFlashcardsForDeck(deckId: Long): List<Flashcard> {
         return repository.getFlashcardsByDeck(deckId).first()
     }
@@ -173,60 +163,45 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+
     // Funções para sessão de estudo
+
     fun startStudySession(deckId: Long? = null) {
         viewModelScope.launch {
             _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)
 
+            val now = System.currentTimeMillis()
+
+            // Obtem a localização atual de forma síncrona
+            val location = repository.getCurrentLocationSync()
+            val locationId = location?.let {
+                repository.getNearestLocation(it.latitude, it.longitude)?.locationId
+            }
+
             studySessionCards = if (deckId != null) {
-                repository.getDueFlashcardsForDeck(deckId).toMutableList()
+                repository.getDueFlashcardsForDeck(deckId, now, locationId).toMutableList()
             } else {
-                repository.getAllDueFlashcards().toMutableList()
+                repository.getAllDueFlashcards(now, locationId).toMutableList()
             }
 
-            // Embaralha as cartas para não serem sempre na mesma ordem
-            studySessionCards.shuffle()
-
             if (studySessionCards.isNotEmpty()) {
+                val studyInfo = repository.getStudyInfo(studySessionCards.first().flashcardId)
+
                 _studySessionUiState.value = StudySessionUiState(
                     currentFlashcard = studySessionCards.first(),
+                    currentStudyInfo = studyInfo,
                     remainingCards = studySessionCards.size - 1,
-                    isLoading = false,
-                    currentLocation = _locationsUiState.value.currentLocation
+                    isLoading = false
                 )
             } else {
                 _studySessionUiState.value = StudySessionUiState(
                     isLoading = false,
-                    isCompleted = true,
-                    currentLocation = _locationsUiState.value.currentLocation
+                    isCompleted = true
                 )
             }
         }
     }
 
-    fun startLocationBasedStudy(locationId: Long) {
-        viewModelScope.launch {
-            _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)
-
-            // Busca flashcards específicos para esta localização
-            studySessionCards = repository.getFlashcardsForNewLocation(locationId).toMutableList()
-
-            if (studySessionCards.isNotEmpty()) {
-                _studySessionUiState.value = StudySessionUiState(
-                    currentFlashcard = studySessionCards.first(),
-                    remainingCards = studySessionCards.size - 1,
-                    isLoading = false,
-                    currentLocation = _locationsUiState.value.currentLocation
-                )
-            } else {
-                _studySessionUiState.value = StudySessionUiState(
-                    isLoading = false,
-                    isCompleted = true,
-                    currentLocation = _locationsUiState.value.currentLocation
-                )
-            }
-        }
-    }
 
     fun revealAnswer() {
         _studySessionUiState.value = _studySessionUiState.value.copy(
@@ -240,30 +215,32 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             repository.reviewFlashcard(currentCard.flashcardId, rating)
 
-            // Remove o cartão atual e avança
             if (studySessionCards.isNotEmpty()) {
                 studySessionCards.removeAt(0)
             }
 
             if (studySessionCards.isNotEmpty()) {
+                val nextFlashcard = studySessionCards.first()
+                val studyInfo = repository.getStudyInfo(nextFlashcard.flashcardId)
+
                 _studySessionUiState.value = StudySessionUiState(
-                    currentFlashcard = studySessionCards.first(),
+                    currentFlashcard = nextFlashcard,
+                    currentStudyInfo = studyInfo,
                     remainingCards = studySessionCards.size - 1,
-                    isLoading = false,
-                    currentLocation = _studySessionUiState.value.currentLocation,
-                    isAnswerRevealed = false // Reset para a próxima carta
+                    isLoading = false
                 )
             } else {
                 _studySessionUiState.value = StudySessionUiState(
                     isLoading = false,
-                    isCompleted = true,
-                    currentLocation = _studySessionUiState.value.currentLocation
+                    isCompleted = true
                 )
             }
         }
     }
 
+
     // Funções para localizações
+
     fun addStudyLocation(name: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             repository.addLocation(name, latitude, longitude)
@@ -276,24 +253,108 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun updateCurrentLocation() {
-        locationService.getCurrentLocation { location ->
-            if (location != null) {
-                viewModelScope.launch {
-                    val nearestLocation = repository.getNearestLocation(
-                        location.latitude,
-                        location.longitude
-                    )
+    fun updateCurrentLocation(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            val nearest = repository.getNearestLocation(latitude, longitude)
+            _locationsUiState.value = _locationsUiState.value.copy(
+                currentLocation = nearest
+            )
+            _studySessionUiState.value = _studySessionUiState.value.copy(
+                currentLocation = nearest
+            )
+        }
+    }
 
-                    _locationsUiState.value = _locationsUiState.value.copy(
-                        currentLocation = nearestLocation
-                    )
+    fun startLocationBasedStudy(locationId: Long) {
+        viewModelScope.launch {
+            _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)
 
-                    _studySessionUiState.value = _studySessionUiState.value.copy(
-                        currentLocation = nearestLocation
-                    )
-                }
+            studySessionCards = repository.getFlashcardsForNewLocation(locationId).toMutableList()
+
+            if (studySessionCards.isNotEmpty()) {
+                _studySessionUiState.value = StudySessionUiState(
+                    currentFlashcard = studySessionCards.first(),
+                    remainingCards = studySessionCards.size,
+                    isLoading = false
+                )
+            } else {
+                _studySessionUiState.value = StudySessionUiState(
+                    isLoading = false,
+                    isCompleted = true
+                )
             }
         }
     }
+
+    // Método para atualizar a lista de decks
+    fun refreshDeckList() {
+        viewModelScope.launch {
+            _deckListUiState.value = _deckListUiState.value.copy(isLoading = true)
+
+            val decksFlow = repository.getAllDecks()
+            val deckList = decksFlow.first()
+            val decksWithStats = mutableListOf<DeckWithStats>()
+
+            for (deck in deckList) {
+                val cardCount = repository.getCardCountForDeck(deck.deckId).first()
+                val dueCount = repository.getDueCardCountForDeck(deck.deckId).first()
+
+                decksWithStats.add(
+                    DeckWithStats(
+                        deck = deck,
+                        cardCount = cardCount,
+                        dueCardCount = dueCount
+                    )
+                )
+            }
+
+            _deckListUiState.value = DeckListUiState(
+                decks = decksWithStats,
+                isLoading = false
+            )
+        }
+    }
+
+
+    private val syncService = SyncService(
+        context = application,
+        database = databaseBuilder(
+            application,
+            FlashcardAppDatabase::class.java,
+            "app_database"
+        ).build()
+    )
+
+    // Sincronização completa (enviar e receber dados)
+    fun sync() {
+        viewModelScope.launch {
+            _syncState.value = SyncState.Loading
+            val result = syncService.syncData()
+            _syncState.value = if (result) SyncState.Success else SyncState.Error
+        }
+    }
+
+    // Apenas baixar dados do servidor
+    fun downloadData() {
+        viewModelScope.launch {
+            _syncState.value = SyncState.Loading
+            val result = syncService.downloadAndSaveServerData()
+            _syncState.value = if (result) SyncState.Success else SyncState.Error
+        }
+    }
+
+    // Atualizar Deck
+    fun updateDeck(deck: Deck) {
+        viewModelScope.launch {
+            repository.updateDeck(deck)
+        }
+    }
+}
+
+// Estados possíveis da sincronização
+sealed class SyncState {
+    object Idle : SyncState()
+    object Loading : SyncState()
+    object Success : SyncState()
+    object Error : SyncState()
 }

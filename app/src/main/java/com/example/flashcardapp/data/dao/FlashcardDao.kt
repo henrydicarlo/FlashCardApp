@@ -32,4 +32,13 @@ interface FlashcardDao {
 
     @Delete
     suspend fun deleteFlashcard(flashcard: Flashcard)
+
+    @Query("SELECT * FROM flashcards")
+    fun getAll(): List<Flashcard>
+
+    @Query("DELETE  FROM flashcards")
+    fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(flashcards: List<Flashcard>)
 }

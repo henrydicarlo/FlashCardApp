@@ -59,6 +59,35 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.navigation.compose)
+
+
+    // ViewModel and LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    // Room Database
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // Location Services
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Navigation Components
+    implementation("androidx.navigation:navigation-compose:2.7.5")
+
+    // Dependências de navegação Jetpack Compose
+    implementation("androidx.navigation:navigation-compose:2.7.6")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.33.2-alpha")
 
 
     // ViewModel and LiveData
@@ -83,6 +112,11 @@ dependencies {
     // Dependências de navegação Jetpack Compose
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+    // Ktor
+    implementation("io.ktor:ktor-client-core:2.3.5")
+    implementation("io.ktor:ktor-client-cio:2.3.5")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
 
     // Ktor Client
     implementation("io.ktor:ktor-client-core:2.3.6")

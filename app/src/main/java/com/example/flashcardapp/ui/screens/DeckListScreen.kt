@@ -1,5 +1,6 @@
 package com.example.flashcardapp.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,10 +9,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -20,14 +26,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -42,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,25 +63,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.flashcardapp.R
+import com.example.flashcardapp.data.entities.Deck
 import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
 
-// Definindo as cores da nova paleta
-private val GreenPrimary = Color(0xFF4CAF50) // Verde principal
-private val GreenDark = Color(0xFF388E3C) // Verde escuro para elementos de destaque
-private val GreenLight = Color(0xFFC8E6C9) // Verde claro para fundos secundários
-private val BlueDark = Color(0xFF1A237E) // Azul profundo para contraste
-private val GreenPale = Color(0xFFE8F5E9) // Verde pálido para fundos
-private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos interativos
-private val GrayLight = Color(0xFFF5F5F5) // Cinza claro para áreas de texto
-private val GrayDark = Color(0xFF424242) // Cinza escuro para textos principais
-private val RedError = Color(0xFFEF5350) // Vermelho para erros
-private val BlueInfo = Color(0xFF42A5F5) // Azul para informações
+private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
+private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
+private val BlueDark = Color(0xFF0039CB) // Azul escuro para elementos de destaque
+private val BlueLight = Color(0xFFE3F2FD) // Azul claro para fundos secundários
+private val MagentaSecondary = Color(0xFFE91E63) // Rosa/magenta para elementos complementares
+private val MagentaLight = Color(0xFFFCE4EC) // Rosa claro para fundos sutis
+private val PurpleTransition = Color(0xFF9C27B0) // Roxo para transições em gradientes
+private val NeutralLight = Color(0xFFFAFAFA) // Neutro claro para fundos
+private val NeutralDark = Color(0xFF333333) // Neutro escuro para textos principais
+private val ErrorRed = Color(0xFFE53935) // Vermelho para erros
+private val InfoBlue = Color(0xFF29B6F6) // Azul para informações
+private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos que precisam de destaque especial
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,55 +95,87 @@ fun DeckListScreen(
     navController: NavController,
     viewModel: FlashcardAppViewModel
 ) {
+    // Adicionar este bloco para atualizar a lista toda vez que a tela for composta
+    LaunchedEffect(true) {
+        viewModel.refreshDeckList()
+    }
+
     val deckListState by viewModel.deckListUiState.collectAsState()
     val userStatsState by viewModel.userStatsUiState.collectAsState()
     var showCreateDeckDialog by remember { mutableStateOf(false) }
+    var showEditDeckDialog by remember { mutableStateOf(false) }
+    var showDeleteDeckDialog by remember { mutableStateOf(false) }
+    var selectedDeck by remember { mutableStateOf<Deck?>(null) }
+    var showDeckOptions by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = GreenPale,
+        containerColor = NeutralLight,
         topBar = {
             TopAppBar(
-                title = { Text("", color = Color.White) },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // App logo
+                        Image(
+                            painter = painterResource(id = R.mipmap.logoitera),
+                            contentDescription = "App Logo",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GreenPrimary,
+                    containerColor = Color.White,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
-                navigationIcon = {
-                    Row(
-                        modifier = Modifier.padding(start = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                actions = {
+                    // Stats card in a nice compact design
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = BlueIcons
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        // Ícone de sequência de dias (chama)
                         Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.LocalFireDepartment,
-                                contentDescription = "Dias consecutivos",
-                                tint = AmberAccent
-                            )
-                            Text(
-                                text = "${userStatsState.streakDays}",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+                            // Streak days with flame icon
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocalFireDepartment,
+                                    contentDescription = "Dias consecutivos",
+                                    tint = AmberAccent,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${userStatsState.streakDays}",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
 
-                        // Ícone de taxa de acerto
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
+                            // Divider
                             Box(
                                 modifier = Modifier
-                                    .background(
-                                        color = GreenDark,
-                                        shape = CircleShape
-                                    )
-                                    .padding(4.dp)
+                                    .height(16.dp)
+                                    .width(1.dp)
+                                    .background(Color.White.copy(alpha = 0.3f))
+                            )
+
+                            // Correct answer rate
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
@@ -131,21 +183,86 @@ fun DeckListScreen(
                                     tint = Color.White,
                                     modifier = Modifier.size(16.dp)
                                 )
+                                Text(
+                                    text = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
-                            Text(
-                                text = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
                         }
                     }
-                },
-                actions = {
-                    IconButton(onClick = { navController.navigate("stats") }) {
-                        Icon(Icons.Default.BarChart, contentDescription = "Statistics", tint = Color.White)
+
+                    // Menu with all options
+                    var showMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = BlueIcons
+                        )
                     }
-                    IconButton(onClick = { navController.navigate("locations") }) {
-                        Icon(Icons.Default.LocationOn, contentDescription = "Locations", tint = Color.White)
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(Color.White)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Sincronizar") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = "Sync",
+                                    tint = BlueIcons
+                                )
+                            },
+                            onClick = {
+                                viewModel.sync()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Baixar dados") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Download,
+                                    contentDescription = "Download",
+                                    tint = BlueIcons
+                                )
+                            },
+                            onClick = {
+                                viewModel.downloadData()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Estatísticas") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.BarChart,
+                                    contentDescription = "Statistics",
+                                    tint = BlueIcons
+                                )
+                            },
+                            onClick = {
+                                navController.navigate("stats")
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Locais de Estudo") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.LocationOn,
+                                    contentDescription = "Locations",
+                                    tint = BlueIcons
+                                )
+                            },
+                            onClick = {
+                                navController.navigate("locations")
+                                showMenu = false
+                            }
+                        )
                     }
                 }
             )
@@ -153,44 +270,62 @@ fun DeckListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateDeckDialog = true },
-                containerColor = GreenDark,
+                containerColor = MagentaSecondary,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Deck")
             }
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(GreenPale)
-                .padding(paddingValues)
+        val isRefreshing = remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
+
+        SwipeRefresh(
+            state = SwipeRefreshState(isRefreshing.value),
+            onRefresh = {
+                isRefreshing.value = true
+                coroutineScope.launch {
+                    viewModel.refreshDeckList()
+                    isRefreshing.value = false
+                }
+            }
         ) {
-            if (deckListState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = GreenDark
-                )
-            } else if (deckListState.decks.isEmpty()) {
-                Text(
-                    text = "Nenhum baralho encontrado. Crie um novo!",
-                    color = GrayDark,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(deckListState.decks) { deckWithStats ->
-                        DeckCard(
-                            deckWithStats = deckWithStats,
-                            onClick = { navController.navigate("deck/${deckWithStats.deck.deckId}") },
-                            onStudyClick = { navController.navigate("study/${deckWithStats.deck.deckId}") }
-                        )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(paddingValues)
+            ) {
+                if (deckListState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = BluePrimary
+                    )
+                } else if (deckListState.decks.isEmpty()) {
+                    Text(
+                        text = "Nenhum baralho encontrado. Crie um novo!",
+                        color = NeutralDark,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(deckListState.decks) { deckWithStats ->
+                            DeckCard(
+                                deckWithStats = deckWithStats,
+                                onClick = { navController.navigate("deck/${deckWithStats.deck.deckId}") },
+                                onStudyClick = { navController.navigate("study/${deckWithStats.deck.deckId}") },
+                                onLongClick = {
+                                    selectedDeck = deckWithStats.deck
+                                    showDeckOptions = true
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -206,6 +341,124 @@ fun DeckListScreen(
             }
         )
     }
+
+    if (showEditDeckDialog && selectedDeck != null) {
+        EditDeckDialog(
+            deck = selectedDeck!!,
+            onDismiss = {
+                showEditDeckDialog = false
+                selectedDeck = null
+            },
+            onUpdate = { name, description ->
+                val updatedDeck = selectedDeck!!.copy(
+                    name = name,
+                    description = description
+                )
+                viewModel.updateDeck(updatedDeck)
+                showEditDeckDialog = false
+                selectedDeck = null
+            }
+        )
+    }
+
+    if (showDeleteDeckDialog && selectedDeck != null) {
+        DeleteDeckConfirmationDialog(
+            deck = selectedDeck!!,
+            onConfirm = {
+                viewModel.deleteDeck(selectedDeck!!)
+                showDeleteDeckDialog = false
+                selectedDeck = null
+            },
+            onDismiss = {
+                showDeleteDeckDialog = false
+                selectedDeck = null
+            }
+        )
+    }
+
+    if (showDeckOptions && selectedDeck != null) {
+        DeckOptionsDialog(
+            deck = selectedDeck!!,
+            onEditClick = {
+                showDeckOptions = false
+                showEditDeckDialog = true
+            },
+            onDeleteClick = {
+                showDeckOptions = false
+                showDeleteDeckDialog = true
+            },
+            onDismiss = {
+                showDeckOptions = false
+                selectedDeck = null
+            }
+        )
+    }
+}
+
+@Composable
+fun DeckOptionsDialog(
+    deck: Deck,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = NeutralDark,
+        title = { Text(text = "Opções para \"${deck.name}\"") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onEditClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BluePrimary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        Text("Editar")
+                    }
+                }
+
+                Button(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MagentaSecondary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "Excluir")
+                        Text("Excluir")
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = NeutralDark
+                )
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -213,28 +466,69 @@ fun DeckListScreen(
 fun DeckCard(
     deckWithStats: DeckWithStats,
     onClick: () -> Unit,
-    onStudyClick: () -> Unit
+    onStudyClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                // Add a clickable modifier for long press - not adding it directly to Card
+                .background(Color.White)
+                .padding(2.dp) // Add some padding to make sure it's clickable
         ) {
-            Text(
-                text = deckWithStats.deck.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = GrayDark
-            )
+            // Long press detector using a Box
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp) // Height for long press area
+                // Add long press handling here
+            ) {
+                // Título com Destaque Colorido
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(MagentaSecondary)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = deckWithStats.deck.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = NeutralDark,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    // Add a more options icon
+                    IconButton(
+                        onClick = onLongClick,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Opções",
+                            tint = NeutralDark.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
 
             if (!deckWithStats.deck.description.isNullOrEmpty()) {
                 Text(
                     text = deckWithStats.deck.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GrayDark.copy(alpha = 0.8f),
+                    color = NeutralDark.copy(alpha = 0.8f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 4.dp)
@@ -251,16 +545,17 @@ fun DeckCard(
                 Text(
                     text = "Cartões: ${deckWithStats.cardCount} (${deckWithStats.dueCardCount} para revisar)",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (deckWithStats.dueCardCount > 0) AmberAccent else BlueDark
+                    color = if (deckWithStats.dueCardCount > 0) BluePrimary else NeutralDark.copy(alpha = 0.7f)
                 )
 
                 if (deckWithStats.dueCardCount > 0) {
                     Button(
                         onClick = onStudyClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = GreenDark,
+                            containerColor = BlueIcons,
                             contentColor = Color.White
-                        )
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Estudar")
                     }
@@ -268,8 +563,9 @@ fun DeckCard(
                     OutlinedButton(
                         onClick = onStudyClick,
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = GreenDark
-                        )
+                            contentColor = BluePrimary
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Revisar")
                     }
@@ -290,21 +586,26 @@ fun CreateDeckDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
-        titleContentColor = GrayDark,
-        textContentColor = GrayDark,
-        title = { Text("Criar Novo Baralho") },
+        titleContentColor = NeutralDark,
+        textContentColor = NeutralDark,
+        title = {
+            Text(
+                "Criar Novo Baralho",
+                color = BluePrimary
+            )
+        },
         text = {
             Column {
                 OutlinedTextField(
                     value = deckName,
                     onValueChange = { deckName = it },
-                    label = { Text("Nome do Baralho", color = GrayDark.copy(alpha = 0.7f)) },
+                    label = { Text("Nome do Baralho", color = NeutralDark.copy(alpha = 0.7f)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),
-                        focusedTextColor = GrayDark,
-                        unfocusedTextColor = GrayDark
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
                     )
                 )
 
@@ -313,13 +614,13 @@ fun CreateDeckDialog(
                 OutlinedTextField(
                     value = deckDescription,
                     onValueChange = { deckDescription = it },
-                    label = { Text("Descrição (Opcional)", color = GrayDark.copy(alpha = 0.7f)) },
+                    label = { Text("Descrição (Opcional)", color = NeutralDark.copy(alpha = 0.7f)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),
-                        focusedTextColor = GrayDark,
-                        unfocusedTextColor = GrayDark
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
                     )
                 )
             }
@@ -329,10 +630,11 @@ fun CreateDeckDialog(
                 onClick = { onCreate(deckName, deckDescription.ifEmpty { null }) },
                 enabled = deckName.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GreenDark,
+                    containerColor = BluePrimary,
                     contentColor = Color.White,
-                    disabledContainerColor = GreenDark.copy(alpha = 0.5f)
-                )
+                    disabledContainerColor = BluePrimary.copy(alpha = 0.5f)
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text("Criar")
             }
@@ -341,7 +643,124 @@ fun CreateDeckDialog(
             TextButton(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = BlueDark
+                    contentColor = MagentaSecondary
+                )
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
+fun EditDeckDialog(
+    deck: Deck,
+    onDismiss: () -> Unit,
+    onUpdate: (name: String, description: String?) -> Unit
+) {
+    var deckName by remember { mutableStateOf(deck.name) }
+    var deckDescription by remember { mutableStateOf(deck.description ?: "") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = NeutralDark,
+        textContentColor = NeutralDark,
+        title = {
+            Text(
+                "Editar Baralho",
+                color = BluePrimary
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = deckName,
+                    onValueChange = { deckName = it },
+                    label = { Text("Nome do Baralho", color = NeutralDark.copy(alpha = 0.7f)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = deckDescription,
+                    onValueChange = { deckDescription = it },
+                    label = { Text("Descrição (Opcional)", color = NeutralDark.copy(alpha = 0.7f)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onUpdate(deckName, deckDescription.ifEmpty { null }) },
+                enabled = deckName.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BluePrimary,
+                    contentColor = Color.White,
+                    disabledContainerColor = BluePrimary.copy(alpha = 0.5f)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Salvar")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MagentaSecondary
+                )
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
+fun DeleteDeckConfirmationDialog(
+    deck: Deck,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = NeutralDark,
+        textContentColor = NeutralDark,
+        title = { Text("Excluir Baralho") },
+        text = {
+            Text("Tem certeza que deseja excluir o baralho \"${deck.name}\"? Esta ação não pode ser desfeita e todos os flashcards associados serão removidos.")
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MagentaSecondary,
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Excluir")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = BluePrimary
                 )
             ) {
                 Text("Cancelar")

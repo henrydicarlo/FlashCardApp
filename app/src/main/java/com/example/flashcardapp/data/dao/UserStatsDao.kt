@@ -31,4 +31,13 @@ interface UserStatsDao {
 
     @Query("SELECT * FROM user_stats WHERE id = 1")
     suspend fun getUserStatsSync(): UserStats?
+
+    @Query("SELECT * FROM user_stats")
+    fun getAll(): List<UserStats>
+
+    @Query("DELETE  FROM user_stats")
+    fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(userStats: List<UserStats>)
 }

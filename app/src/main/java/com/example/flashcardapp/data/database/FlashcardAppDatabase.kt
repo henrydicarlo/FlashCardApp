@@ -4,8 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.flashcardapp.data.dao.*
-import com.example.flashcardapp.data.entities.*
+import com.example.flashcardapp.data.dao.DeckDao
+import com.example.flashcardapp.data.dao.FlashcardDao
+import com.example.flashcardapp.data.dao.LocationDao
+import com.example.flashcardapp.data.dao.StudyInfoDao
+import com.example.flashcardapp.data.dao.UserStatsDao
+import com.example.flashcardapp.data.entities.Deck
+import com.example.flashcardapp.data.entities.Flashcard
+import com.example.flashcardapp.data.entities.StudyInfo
+import com.example.flashcardapp.data.entities.StudyLocation
+import com.example.flashcardapp.data.entities.UserStats
 
 @Database(
     entities = [

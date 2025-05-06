@@ -1,20 +1,25 @@
 package com.example.flashcardapp.data.repository
 
 import android.app.Application
-import android.util.Log
-import com.example.flashcardapp.api.ApiRepository
+import android.location.Location
 import com.example.flashcardapp.data.database.FlashcardAppDatabase
-import com.example.flashcardapp.data.entities.*
+import com.example.flashcardapp.data.entities.Deck
+import com.example.flashcardapp.data.entities.Flashcard
+import com.example.flashcardapp.data.entities.FlashcardType
+import com.example.flashcardapp.data.entities.StudyInfo
+import com.example.flashcardapp.data.entities.StudyLocation
+import com.example.flashcardapp.data.entities.UserStats
 import com.example.flashcardapp.services.LocationService
 import com.example.flashcardapp.utils.SpacedRepetitionAlgorithm
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import kotlin.math.max
-import kotlin.random.Random
+
 
 /**
  * Repositório principal que gerencia todas as operações de dados
@@ -31,9 +36,6 @@ class FlashcardRepository(
 
     private val spacedRepetition = SpacedRepetitionAlgorithm()
     private val locationService = LocationService(application)
-
-    // Criar o ApiRepository passando this como parâmetro para evitar recursão
-    private val apiRepository by lazy { ApiRepository(application, this) }
 
     // UserStats operations
     val userStats: Flow<UserStats> = userStatsDao.getUserStats()
@@ -88,68 +90,172 @@ class FlashcardRepository(
 
     fun getDueCardCountForDeck(deckId: Long) = deckDao.getDueCardCountForDeck(deckId)
 
-    suspend fun createDeck(name: String, description: String?): Long {
-        return apiRepository.createDeck(name, description)
-    }
+    suspend fun createDeck(name: String, description: String?) =
+        deckDao.insertDeck(Deck(name = name, description = description))
 
-    suspend fun updateDeck(deck: Deck) {
-        deckDao.updateDeck(deck)
-        apiRepository.updateDeck(deck)
-    }
+    suspend fun updateDeck(deck: Deck) = deckDao.updateDeck(deck)
 
-    suspend fun deleteDeck(deck: Deck) {
-        deckDao.deleteDeck(deck)
-        apiRepository.deleteDeck(deck)
-    }
+    suspend fun deleteDeck(deck: Deck) = deckDao.deleteDeck(deck)
 
     // Flashcard operations
     fun getFlashcardsByDeck(deckId: Long) = flashcardDao.getFlashcardsByDeck(deckId)
 
-    suspend fun getDueFlashcardsForDeck(deckId: Long): List<Flashcard> {
-        val dueCards = flashcardDao.getDueFlashcardsForDeck(deckId)
+    suspend fun getDueFlashcardsForDeck(deckId: Long, now: Long, currentLocationId: Long?): List<Flashcard> {
+        val allDue = flashcardDao.getDueFlashcardsForDeck(deckId, now)
 
-        // Sincroniza com a API antes de retornar
-        apiRepository.syncFlashcards(deckId)
-
-        return dueCards
+        return if (currentLocationId == null) {
+            allDue
+        } else {
+            allDue.sortedBy {
+                if (it.createdLocationId == currentLocationId) 1 else 0
+            }
+        }
     }
 
-    suspend fun getAllDueFlashcards(): List<Flashcard> {
-        return flashcardDao.getAllDueFlashcards()
+    suspend fun getCurrentLocationSync(): Location? = withContext(Dispatchers.IO) {
+        val deferred = CompletableDeferred<Location?>()
+        locationService.getCurrentLocation { location ->
+            deferred.complete(location)
+        }
+        deferred.await()
     }
+    suspend fun getAllDueFlashcards(now: Long, currentLocationId: Long?): List<Flashcard> {
+        val allDueCards = flashcardDao.getAllDueFlashcards(now)
+
+        return if (currentLocationId == null) {
+            allDueCards
+        } else {
+            // Separa os cards por localização
+            val (sameLocation, otherLocations) = allDueCards.partition {
+                it.createdLocationId == currentLocationId
+            }
+
+            // Diminui a chance dos da mesma localização (ex: 25% da lista)
+            val reducedSameLocation = sameLocation.shuffled().take((sameLocation.size * 0.25).toInt())
+
+            // Junta tudo e embaralha para não criar padrão
+            (otherLocations + reducedSameLocation).shuffled()
+        }
+    }
+
+
 
     suspend fun createBasicFlashcard(deckId: Long, question: String, answer: String): Long {
-        return apiRepository.createBasicFlashcard(deckId, question, answer)
+        var createdLocationId: Long? = null
+
+        // Tenta obter a localização atual
+        val locationDeferred = kotlinx.coroutines.CompletableDeferred<Location?>()
+        locationService.getCurrentLocation { location ->
+            locationDeferred.complete(location)
+        }
+
+        val location = locationDeferred.await()
+        if (location != null) {
+            val nearestLocation = locationDao.getNearestLocation(location.latitude, location.longitude)
+            createdLocationId = nearestLocation?.locationId
+        }
+
+        val flashcardId = flashcardDao.insertFlashcard(
+            Flashcard(
+                deckId = deckId,
+                type = FlashcardType.BASIC,
+                question = question,
+                answer = answer,
+                createdLocationId = createdLocationId
+            )
+        )
+
+        studyInfoDao.insertOrUpdateStudyInfo(StudyInfo(flashcardId = flashcardId))
+        return flashcardId
     }
+
+
 
     suspend fun createQuizFlashcard(deckId: Long, question: String, answer: String, options: List<String>): Long {
-        return apiRepository.createQuizFlashcard(deckId, question, answer, options)
+        val optionsString = options.joinToString("|")
+
+        val locationDeferred = kotlinx.coroutines.CompletableDeferred<Location?>()
+        locationService.getCurrentLocation { location ->
+            locationDeferred.complete(location)
+        }
+        val location = locationDeferred.await()
+        val nearestLocation = location?.let {
+            locationDao.getNearestLocation(it.latitude, it.longitude)
+        }
+
+        val flashcardId = flashcardDao.insertFlashcard(
+            Flashcard(
+                deckId = deckId,
+                type = FlashcardType.QUIZ,
+                question = question,
+                answer = answer,
+                options = optionsString,
+                createdLocationId = nearestLocation?.locationId
+            )
+        )
+
+        studyInfoDao.insertOrUpdateStudyInfo(StudyInfo(flashcardId = flashcardId))
+        return flashcardId
     }
+
 
     suspend fun createClozeFlashcard(deckId: Long, fullText: String, hiddenText: String): Long {
-        return apiRepository.createClozeFlashcard(deckId, fullText, hiddenText)
+        val locationDeferred = kotlinx.coroutines.CompletableDeferred<Location?>()
+        locationService.getCurrentLocation { location ->
+            locationDeferred.complete(location)
+        }
+        val location = locationDeferred.await()
+        val nearestLocation = location?.let {
+            locationDao.getNearestLocation(it.latitude, it.longitude)
+        }
+
+        val flashcardId = flashcardDao.insertFlashcard(
+            Flashcard(
+                deckId = deckId,
+                type = FlashcardType.CLOZE,
+                question = fullText.replace(hiddenText, "..."),
+                answer = hiddenText,
+                fullText = fullText,
+                createdLocationId = nearestLocation?.locationId
+            )
+        )
+
+        studyInfoDao.insertOrUpdateStudyInfo(StudyInfo(flashcardId = flashcardId))
+        return flashcardId
     }
+
 
     suspend fun createInputFlashcard(deckId: Long, question: String, answer: String): Long {
-        return apiRepository.createInputFlashcard(deckId, question, answer)
+        val locationDeferred = kotlinx.coroutines.CompletableDeferred<Location?>()
+        locationService.getCurrentLocation { location ->
+            locationDeferred.complete(location)
+        }
+        val location = locationDeferred.await()
+        val nearestLocation = location?.let {
+            locationDao.getNearestLocation(it.latitude, it.longitude)
+        }
+
+        val flashcardId = flashcardDao.insertFlashcard(
+            Flashcard(
+                deckId = deckId,
+                type = FlashcardType.INPUT,
+                question = question,
+                answer = answer,
+                createdLocationId = nearestLocation?.locationId
+            )
+        )
+
+        studyInfoDao.insertOrUpdateStudyInfo(StudyInfo(flashcardId = flashcardId))
+        return flashcardId
     }
 
-    suspend fun updateFlashcard(flashcard: Flashcard) {
-        flashcardDao.updateFlashcard(flashcard)
-        apiRepository.updateFlashcard(flashcard)
-    }
 
-    suspend fun deleteFlashcard(flashcard: Flashcard) {
-        flashcardDao.deleteFlashcard(flashcard)
-        apiRepository.deleteFlashcard(flashcard)
-    }
+    suspend fun updateFlashcard(flashcard: Flashcard) = flashcardDao.updateFlashcard(flashcard)
+
+    suspend fun deleteFlashcard(flashcard: Flashcard) = flashcardDao.deleteFlashcard(flashcard)
 
     // Study and review operations
     suspend fun getStudyInfo(flashcardId: Long) = studyInfoDao.getStudyInfo(flashcardId)
-
-    suspend fun updateStudyInfo(studyInfo: StudyInfo) {
-        studyInfoDao.insertOrUpdateStudyInfo(studyInfo)
-    }
 
     suspend fun reviewFlashcard(flashcardId: Long, rating: Int) {
         val studyInfo = studyInfoDao.getStudyInfo(flashcardId) ?: return
@@ -191,76 +297,27 @@ class FlashcardRepository(
     suspend fun addLocation(name: String, latitude: Double, longitude: Double): Long? {
         val count = locationDao.getLocationCount()
         return if (count < 7) {
-            val locationId = locationDao.insertLocation(
+            locationDao.insertLocation(
                 StudyLocation(
                     name = name,
                     latitude = latitude,
                     longitude = longitude
                 )
             )
-
-            locationId
         } else {
             null // Limite de 7 localizações atingido
         }
     }
 
-    suspend fun updateLocation(location: StudyLocation) {
-        locationDao.updateLocation(location)
-        apiRepository.updateLocation(location)
-    }
+    suspend fun updateLocation(location: StudyLocation) = locationDao.updateLocation(location)
 
-    suspend fun deleteLocation(location: StudyLocation) {
-        locationDao.deleteLocation(location)
-        apiRepository.deleteLocation(location)
-    }
+    suspend fun deleteLocation(location: StudyLocation) = locationDao.deleteLocation(location)
 
     suspend fun getNearestLocation(latitude: Double, longitude: Double) =
         locationDao.getNearestLocation(latitude, longitude)
 
-    suspend fun getFlashcardsForNewLocation(locationId: Long, limit: Int = 10): List<Flashcard> {
-        // Busca todos os flashcards disponíveis
-        val allFlashcards = flashcardDao.getAllDueFlashcards()
+    suspend fun getFlashcardsForNewLocation(locationId: Long, limit: Int = 10) =
+        flashcardDao.getFlashcardsNotReviewedAtLocation(locationId, limit)
 
-        // Busca informações de estudo para todos os flashcards
-        val flashcardIds = allFlashcards.map { it.flashcardId }
-        val studyInfos = studyInfoDao.getStudyInfoBatch(flashcardIds)
 
-        // Mapa para acesso rápido de studyInfo por flashcardId
-        val studyInfoMap = studyInfos.associateBy { it.flashcardId }
-
-        // Filtra e ordena flashcards com base na localização
-        val flashcardsWithPriority = allFlashcards.mapNotNull { flashcard ->
-            val studyInfo = studyInfoMap[flashcard.flashcardId] ?: return@mapNotNull null
-
-            // Calcula probabilidade baseada na localização
-            val probability = spacedRepetition.calculateLocationBasedProbability(studyInfo, locationId)
-
-            // Adiciona um elemento aleatório para não ser sempre o mesmo padrão
-            val randomFactor = Random.nextDouble(0.0, 0.2)
-            val finalPriority = probability + randomFactor
-
-            Pair(flashcard, finalPriority)
-        }
-
-        // Ordena por prioridade (maior primeiro) e retorna os primeiros 'limit' flashcards
-        return flashcardsWithPriority
-            .sortedByDescending { it.second }
-            .take(limit)
-            .map { it.first }
-    }
-
-    // Sincronização inicial
-    suspend fun syncAllData() {
-        // Chama os métodos de sincronização no ApiRepository
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                apiRepository.syncDecks()
-                apiRepository.syncLocations()
-                apiRepository.syncUserStats()
-            } catch (e: Exception) {
-                Log.e("FlashcardRepository", "Error syncing data", e)
-            }
-        }
-    }
 }

@@ -29,4 +29,13 @@ interface DeckDao {
 
     @Query("SELECT COUNT(*) FROM flashcards INNER JOIN study_info ON flashcards.flashcardId = study_info.flashcard_id WHERE deck_id = :deckId AND study_info.nextReviewDate <= :currentTime")
     fun getDueCardCountForDeck(deckId: Long, currentTime: Long = System.currentTimeMillis()): Flow<Int>
+
+    @Query("SELECT * FROM decks ORDER BY name")
+    fun getAll(): List<Deck>
+
+    @Query("DELETE FROM flashcards")
+    fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(decks: List<Deck>)
 }

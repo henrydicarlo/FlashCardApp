@@ -22,4 +22,13 @@ interface StudyInfoDao {
 
     @Query("SELECT COUNT(*) FROM study_info WHERE reviewLocations LIKE '%' || :locationId || '%'")
     suspend fun getReviewCountAtLocation(locationId: Long): Int
+
+    @Query("SELECT * FROM study_info ")
+    fun getAll(): List<StudyInfo>
+
+    @Query("DELETE FROM study_info ")
+    fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(studyInfos: List<StudyInfo>)
 }
