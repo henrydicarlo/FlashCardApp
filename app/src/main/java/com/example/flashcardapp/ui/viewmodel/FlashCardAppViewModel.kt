@@ -285,30 +285,33 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+
+    // Método para atualizar a lista de decks
     fun refreshDeckList() {
         viewModelScope.launch {
+            _deckListUiState.value = _deckListUiState.value.copy(isLoading = true)
+
             val decksFlow = repository.getAllDecks()
-            decksFlow.collect { deckList ->
-                val decksWithStats = mutableListOf<DeckWithStats>()
+            val deckList = decksFlow.first()
+            val decksWithStats = mutableListOf<DeckWithStats>()
 
-                for (deck in deckList) {
-                    val cardCount = repository.getCardCountForDeck(deck.deckId).first()
-                    val dueCount = repository.getDueCardCountForDeck(deck.deckId).first()
+            for (deck in deckList) {
+                val cardCount = repository.getCardCountForDeck(deck.deckId).first()
+                val dueCount = repository.getDueCardCountForDeck(deck.deckId).first()
 
-                    decksWithStats.add(
-                        DeckWithStats(
-                            deck = deck,
-                            cardCount = cardCount,
-                            dueCardCount = dueCount
-                        )
+                decksWithStats.add(
+                    DeckWithStats(
+                        deck = deck,
+                        cardCount = cardCount,
+                        dueCardCount = dueCount
                     )
-                }
-
-                _deckListUiState.value = DeckListUiState(
-                    decks = decksWithStats,
-                    isLoading = false
                 )
             }
+
+            _deckListUiState.value = DeckListUiState(
+                decks = decksWithStats,
+                isLoading = false
+            )
         }
     }
 
@@ -339,6 +342,13 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
             _syncState.value = if (result) SyncState.Success else SyncState.Error
         }
     }
+
+    // Atualizar Deck
+    fun updateDeck(deck: Deck) {
+        viewModelScope.launch {
+            repository.updateDeck(deck)
+        }
+    }
 }
 
 // Estados possíveis da sincronização
@@ -348,4 +358,3 @@ sealed class SyncState {
     object Success : SyncState()
     object Error : SyncState()
 }
-

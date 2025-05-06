@@ -26,9 +26,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,6 +39,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -50,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,23 +64,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.room.Room
 import com.example.flashcardapp.R
-import com.example.flashcardapp.services.SyncService
+import com.example.flashcardapp.data.entities.Deck
 import com.example.flashcardapp.ui.model.DeckWithStats
 import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
 import kotlin.math.roundToInt
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 
 private val BluePrimary = Color(0xFF2962FF) // Azul vibrante primário
 private val BlueIcons = Color(0xFF5481FF) // Azul mais claro para ícones
@@ -96,9 +95,18 @@ fun DeckListScreen(
     navController: NavController,
     viewModel: FlashcardAppViewModel
 ) {
+    // Adicionar este bloco para atualizar a lista toda vez que a tela for composta
+    LaunchedEffect(true) {
+        viewModel.refreshDeckList()
+    }
+
     val deckListState by viewModel.deckListUiState.collectAsState()
     val userStatsState by viewModel.userStatsUiState.collectAsState()
     var showCreateDeckDialog by remember { mutableStateOf(false) }
+    var showEditDeckDialog by remember { mutableStateOf(false) }
+    var showDeleteDeckDialog by remember { mutableStateOf(false) }
+    var selectedDeck by remember { mutableStateOf<Deck?>(null) }
+    var showDeckOptions by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = NeutralLight,
@@ -311,7 +319,11 @@ fun DeckListScreen(
                             DeckCard(
                                 deckWithStats = deckWithStats,
                                 onClick = { navController.navigate("deck/${deckWithStats.deck.deckId}") },
-                                onStudyClick = { navController.navigate("study/${deckWithStats.deck.deckId}") }
+                                onStudyClick = { navController.navigate("study/${deckWithStats.deck.deckId}") },
+                                onLongClick = {
+                                    selectedDeck = deckWithStats.deck
+                                    showDeckOptions = true
+                                }
                             )
                         }
                     }
@@ -329,6 +341,124 @@ fun DeckListScreen(
             }
         )
     }
+
+    if (showEditDeckDialog && selectedDeck != null) {
+        EditDeckDialog(
+            deck = selectedDeck!!,
+            onDismiss = {
+                showEditDeckDialog = false
+                selectedDeck = null
+            },
+            onUpdate = { name, description ->
+                val updatedDeck = selectedDeck!!.copy(
+                    name = name,
+                    description = description
+                )
+                viewModel.updateDeck(updatedDeck)
+                showEditDeckDialog = false
+                selectedDeck = null
+            }
+        )
+    }
+
+    if (showDeleteDeckDialog && selectedDeck != null) {
+        DeleteDeckConfirmationDialog(
+            deck = selectedDeck!!,
+            onConfirm = {
+                viewModel.deleteDeck(selectedDeck!!)
+                showDeleteDeckDialog = false
+                selectedDeck = null
+            },
+            onDismiss = {
+                showDeleteDeckDialog = false
+                selectedDeck = null
+            }
+        )
+    }
+
+    if (showDeckOptions && selectedDeck != null) {
+        DeckOptionsDialog(
+            deck = selectedDeck!!,
+            onEditClick = {
+                showDeckOptions = false
+                showEditDeckDialog = true
+            },
+            onDeleteClick = {
+                showDeckOptions = false
+                showDeleteDeckDialog = true
+            },
+            onDismiss = {
+                showDeckOptions = false
+                selectedDeck = null
+            }
+        )
+    }
+}
+
+@Composable
+fun DeckOptionsDialog(
+    deck: Deck,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = NeutralDark,
+        title = { Text(text = "Opções para \"${deck.name}\"") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onEditClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BluePrimary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        Text("Editar")
+                    }
+                }
+
+                Button(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MagentaSecondary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "Excluir")
+                        Text("Excluir")
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = NeutralDark
+                )
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -336,7 +466,8 @@ fun DeckListScreen(
 fun DeckCard(
     deckWithStats: DeckWithStats,
     onClick: () -> Unit,
-    onStudyClick: () -> Unit
+    onStudyClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Card(
         onClick = onClick,
@@ -346,22 +477,51 @@ fun DeckCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                // Add a clickable modifier for long press - not adding it directly to Card
+                .background(Color.White)
+                .padding(2.dp) // Add some padding to make sure it's clickable
         ) {
-            // Título com Destaque Colorido
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(MagentaSecondary)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = deckWithStats.deck.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = NeutralDark
-                )
+            // Long press detector using a Box
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp) // Height for long press area
+                // Add long press handling here
+            ) {
+                // Título com Destaque Colorido
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(MagentaSecondary)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = deckWithStats.deck.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = NeutralDark,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    // Add a more options icon
+                    IconButton(
+                        onClick = onLongClick,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Opções",
+                            tint = NeutralDark.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             }
 
             if (!deckWithStats.deck.description.isNullOrEmpty()) {
@@ -484,6 +644,123 @@ fun CreateDeckDialog(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = MagentaSecondary
+                )
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
+fun EditDeckDialog(
+    deck: Deck,
+    onDismiss: () -> Unit,
+    onUpdate: (name: String, description: String?) -> Unit
+) {
+    var deckName by remember { mutableStateOf(deck.name) }
+    var deckDescription by remember { mutableStateOf(deck.description ?: "") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = NeutralDark,
+        textContentColor = NeutralDark,
+        title = {
+            Text(
+                "Editar Baralho",
+                color = BluePrimary
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = deckName,
+                    onValueChange = { deckName = it },
+                    label = { Text("Nome do Baralho", color = NeutralDark.copy(alpha = 0.7f)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = deckDescription,
+                    onValueChange = { deckDescription = it },
+                    label = { Text("Descrição (Opcional)", color = NeutralDark.copy(alpha = 0.7f)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = BluePrimary,
+                        unfocusedBorderColor = NeutralDark.copy(alpha = 0.3f),
+                        focusedTextColor = NeutralDark,
+                        unfocusedTextColor = NeutralDark
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onUpdate(deckName, deckDescription.ifEmpty { null }) },
+                enabled = deckName.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BluePrimary,
+                    contentColor = Color.White,
+                    disabledContainerColor = BluePrimary.copy(alpha = 0.5f)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Salvar")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MagentaSecondary
+                )
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
+fun DeleteDeckConfirmationDialog(
+    deck: Deck,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        titleContentColor = NeutralDark,
+        textContentColor = NeutralDark,
+        title = { Text("Excluir Baralho") },
+        text = {
+            Text("Tem certeza que deseja excluir o baralho \"${deck.name}\"? Esta ação não pode ser desfeita e todos os flashcards associados serão removidos.")
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MagentaSecondary,
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Excluir")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = BluePrimary
                 )
             ) {
                 Text("Cancelar")
