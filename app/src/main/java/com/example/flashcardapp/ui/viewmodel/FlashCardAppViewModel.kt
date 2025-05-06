@@ -165,7 +165,6 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
 
 
     // Funções para sessão de estudo
-
     fun startStudySession(deckId: Long? = null) {
         viewModelScope.launch {
             _studySessionUiState.value = _studySessionUiState.value.copy(isLoading = true)
@@ -178,10 +177,16 @@ class FlashcardAppViewModel(application: Application) : AndroidViewModel(applica
                 repository.getNearestLocation(it.latitude, it.longitude)?.locationId
             }
 
+            // Tenta obter os cards devidos primeiro
             studySessionCards = if (deckId != null) {
                 repository.getDueFlashcardsForDeck(deckId, now, locationId).toMutableList()
             } else {
                 repository.getAllDueFlashcards(now, locationId).toMutableList()
+            }
+
+            // Se não houver cards devidos, obtenha todos os cards do deck
+            if (studySessionCards.isEmpty() && deckId != null) {
+                studySessionCards = repository.getFlashcardsByDeck(deckId).first().toMutableList()
             }
 
             if (studySessionCards.isNotEmpty()) {

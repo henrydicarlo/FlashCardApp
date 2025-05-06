@@ -510,7 +510,6 @@ fun DeckCard(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Add a more options icon
                     IconButton(
                         onClick = onLongClick,
                         modifier = Modifier.size(24.dp)

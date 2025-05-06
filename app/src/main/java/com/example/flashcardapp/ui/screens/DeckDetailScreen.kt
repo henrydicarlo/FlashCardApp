@@ -123,11 +123,9 @@ fun DeckDetailScreen(
                     }
                 },
                 actions = {
-                    if (!flashcards.isNullOrEmpty()) {
                         IconButton(onClick = { navController.navigate("study/$deckId") }) {
                             Icon(Icons.Default.PlayArrow, contentDescription = "Estudar")
                         }
-                    }
                 }
             )
         },
