@@ -61,8 +61,7 @@ class SpacedRepetitionAlgorithm {
     private fun updateInterval(studyInfo: StudyInfo, multiplier: Double) {
         val interval = when (studyInfo.repetitions) {
             0 -> 1
-            1 -> 3
-            else -> (studyInfo.interval * studyInfo.easeFactor * multiplier).toInt()
+            else -> (max(1.0, studyInfo.interval.toDouble()) * studyInfo.easeFactor * multiplier).toInt()
         }
 
         studyInfo.interval = max(1, interval)
