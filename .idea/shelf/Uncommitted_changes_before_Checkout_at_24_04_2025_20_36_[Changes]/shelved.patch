@@ -1,0 +1,195 @@
+Index: app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.screens\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.Icons.Default\r\nimport androidx.compose.material.icons.filled.*\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.graphics.vector.ImageVector\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\n\r\n@Composable\r\nfun DashboardScreen() {\r\n    Box(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(Color(0xFF5D2316))\r\n            .padding(16.dp)\r\n    ) {\r\n        Column(\r\n            modifier = Modifier\r\n                .fillMaxSize()\r\n                .padding(horizontal = 24.dp, vertical = 32.dp) //\r\n        ) {\r\n            // Cabeçalho\r\n            Row(\r\n                modifier = Modifier.fillMaxWidth(),\r\n                horizontalArrangement = Arrangement.SpaceBetween,\r\n                verticalAlignment = Alignment.CenterVertically\r\n            ) {\r\n                Text(\r\n                    text = \"FlashcardsApp\",\r\n                    fontSize = 24.sp,\r\n                    fontWeight = FontWeight.Bold,\r\n                    color = Color.White\r\n                )\r\n                Row(verticalAlignment = Alignment.CenterVertically) {\r\n                    Icon(\r\n                        imageVector = Default.Place,\r\n                        contentDescription = \"Local\",\r\n                        tint = Color.Red\r\n                    )\r\n                    Text(\r\n                        text = \"sala\",\r\n                        color = Color.White\r\n                    )\r\n                    Icon(\r\n                        imageVector = Default.KeyboardArrowRight,\r\n                        contentDescription = \"Ir\",\r\n                        tint = Color.White\r\n                    )\r\n                }\r\n            }\r\n\r\n            Spacer(modifier = Modifier.height(24.dp))\r\n\r\n            StatusCard(\r\n                icon = Default.FlashOn,\r\n                iconColor = Color.Yellow,\r\n                value = \"0%\",\r\n                label = \"Taxa de acertos\"\r\n            )\r\n            Spacer(modifier = Modifier.height(8.dp))\r\n\r\n            StatusCard(\r\n                icon = Default.Whatshot,\r\n                iconColor = Color.Red,\r\n                value = \"0\",\r\n                label = \"Dias seguidos de estudo\"\r\n            )\r\n            Spacer(modifier = Modifier.height(8.dp))\r\n\r\n            StatusCard(\r\n                icon = Default.EmojiEvents,\r\n                iconColor = Color(0xFFFFD700),\r\n                value = \"0\",\r\n                label = \"Record de dias\"\r\n            )\r\n        }\r\n\r\n        // FAB\r\n        FloatingActionButton(\r\n            onClick = { /* ação ao clicar */ },\r\n            containerColor = Color(0xFF2E3B00),\r\n            contentColor = Color.White,\r\n            modifier = Modifier\r\n                .align(Alignment.BottomEnd)\r\n                .padding(16.dp)\r\n        ) {\r\n            Icon(Default.Add, contentDescription = \"Adicionar\")\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun StatusCard(icon: ImageVector, iconColor: Color, value: String, label: String) {\r\n    Card(\r\n        colors = CardDefaults.cardColors(containerColor = Color(0xFF7A2F1B)),\r\n        shape = RoundedCornerShape(8.dp),\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .height(60.dp),\r\n        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)\r\n    ) {\r\n        Row(\r\n            verticalAlignment = Alignment.CenterVertically,\r\n            modifier = Modifier.padding(horizontal = 16.dp)\r\n        ) {\r\n            Icon(\r\n                imageVector = icon,\r\n                contentDescription = null,\r\n                tint = iconColor,\r\n                modifier = Modifier.size(24.dp)\r\n            )\r\n            Spacer(modifier = Modifier.width(12.dp))\r\n            Column {\r\n                Text(\r\n                    text = value,\r\n                    fontWeight = FontWeight.Bold,\r\n                    color = Color.Yellow,\r\n                    fontSize = 16.sp\r\n                )\r\n                Text(\r\n                    text = label,\r\n                    color = Color.White,\r\n                    fontSize = 12.sp\r\n                )\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt b/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt
+--- a/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt	(revision 1f2fdbb69326802989d99d961ba6d8dc4c218d76)
++++ b/app/src/main/java/com/example/flashcardapp/screens/DashboardScreen.kt	(date 1745536962319)
+@@ -1,5 +1,6 @@
+ package com.example.flashcardapp.screens
+ 
++import android.content.Intent
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.shape.RoundedCornerShape
+@@ -15,6 +16,8 @@
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
++import androidx.core.content.ContextCompat.startActivity
++import com.example.flashcardapp.screens.AddCardScreen
+ 
+ @Composable
+ fun DashboardScreen() {
+@@ -87,7 +90,11 @@
+ 
+         // FAB
+         FloatingActionButton(
+-            onClick = { /* ação ao clicar */ },
++            onClick = {
++
++                val intent = Intent(this, AddCardScreen::class.java)
++                startActivity(intent)
++            },
+             containerColor = Color(0xFF2E3B00),
+             contentColor = Color.White,
+             modifier = Modifier
+Index: app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.screens\r\n\r\n\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.compose.foundation.layout.Box\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\n\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n\r\n                Box(\r\n                    modifier = Modifier.fillMaxSize(),\r\n                    contentAlignment = Alignment.Center\r\n                ) {\r\n                    Text(text = \"Olá Mundo\", style = MaterialTheme.typography.headlineMedium)\r\n                }\r\n\r\n        }\r\n    }\r\n}\r\n
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt b/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt
+--- a/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt	(revision 1f2fdbb69326802989d99d961ba6d8dc4c218d76)
++++ b/app/src/main/java/com/example/flashcardapp/screens/AddCardScreen.kt	(date 1745536962299)
+@@ -1,28 +1,121 @@
+ package com.example.flashcardapp.screens
+ 
+ 
++import android.content.Intent
+ import android.os.Bundle
+ import androidx.activity.ComponentActivity
+ import androidx.activity.compose.setContent
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Arrangement
+ import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.Spacer
+ import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.height
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material.icons.Icons.Default
++import androidx.compose.material.icons.filled.Add
++import androidx.compose.material.icons.filled.EmojiEvents
++import androidx.compose.material.icons.filled.FlashOn
++import androidx.compose.material.icons.filled.KeyboardArrowRight
++import androidx.compose.material.icons.filled.Place
++import androidx.compose.material.icons.filled.Whatshot
++import androidx.compose.material3.FloatingActionButton
++import androidx.compose.material3.Icon
+ import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.Text
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++import androidx.core.content.ContextCompat.startActivity
+ 
+-class MainActivity : ComponentActivity() {
+-    override fun onCreate(savedInstanceState: Bundle?) {
+-        super.onCreate(savedInstanceState)
+-        setContent {
+-
+-                Box(
+-                    modifier = Modifier.fillMaxSize(),
+-                    contentAlignment = Alignment.Center
+-                ) {
+-                    Text(text = "Olá Mundo", style = MaterialTheme.typography.headlineMedium)
++fun DashboardScreen() {
++    Box(
++        modifier = Modifier
++            .fillMaxSize()
++            .background(Color(0xFF5D2316))
++            .padding(16.dp)
++    ) {
++        Column(
++            modifier = Modifier
++                .fillMaxSize()
++                .padding(horizontal = 24.dp, vertical = 32.dp) //
++        ) {
++            // Cabeçalho
++            Row(
++                modifier = Modifier.fillMaxWidth(),
++                horizontalArrangement = Arrangement.SpaceBetween,
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Text(
++                    text = "FlashcardsApp",
++                    fontSize = 24.sp,
++                    fontWeight = FontWeight.Bold,
++                    color = Color.White
++                )
++                Row(verticalAlignment = Alignment.CenterVertically) {
++                    Icon(
++                        imageVector = Default.Place,
++                        contentDescription = "Local",
++                        tint = Color.Red
++                    )
++                    Text(
++                        text = "sala",
++                        color = Color.White
++                    )
++                    Icon(
++                        imageVector = Default.KeyboardArrowRight,
++                        contentDescription = "Ir",
++                        tint = Color.White
++                    )
+                 }
++            }
+ 
++            Spacer(modifier = Modifier.height(24.dp))
++
++            StatusCard(
++                icon = Default.FlashOn,
++                iconColor = Color.Yellow,
++                value = "0%",
++                label = "Taxa de acertos"
++            )
++            Spacer(modifier = Modifier.height(8.dp))
++
++            StatusCard(
++                icon = Default.Whatshot,
++                iconColor = Color.Red,
++                value = "0",
++                label = "Dias seguidos de estudo"
++            )
++            Spacer(modifier = Modifier.height(8.dp))
++
++            StatusCard(
++                icon = Default.EmojiEvents,
++                iconColor = Color(0xFFFFD700),
++                value = "0",
++                label = "Record de dias"
++            )
+         }
+-    }
+-}
++
++        // FAB
++        FloatingActionButton(
++            onClick = {
++
++                val intent = Intent(this, AddCardScreen::class.java)
++                startActivity(intent)
++            },
++            containerColor = Color(0xFF2E3B00),
++            contentColor = Color.White,
++            modifier = Modifier
++                .align(Alignment.BottomEnd)
++                .padding(16.dp)
++        ) {
++            Icon(Default.Add, contentDescription = "Adicionar")
++        }
++    }
++}
+\ No newline at end of file
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"CHOOSE_PER_TEST\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleJvm\" value=\"#GRADLE_LOCAL_JAVA_HOME\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision 1f2fdbb69326802989d99d961ba6d8dc4c218d76)
++++ b/.idea/gradle.xml	(date 1745535892886)
+@@ -1,5 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
++  <component name="GradleMigrationSettings" migrationVersion="1" />
+   <component name="GradleSettings">
+     <option name="linkedExternalProjectsSettings">
+       <GradleProjectSettings>

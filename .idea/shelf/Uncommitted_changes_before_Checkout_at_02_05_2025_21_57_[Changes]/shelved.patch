@@ -1,0 +1,477 @@
+Index: app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.ui.screens\r\n\r\n\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.lazy.LazyColumn\r\nimport androidx.compose.foundation.lazy.items\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.Add\r\nimport androidx.compose.material.icons.filled.LocationOn\r\nimport androidx.compose.material.icons.filled.MoreVert\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.text.style.TextOverflow\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.navigation.NavController\r\nimport com.example.flashcardapp.ui.model.DeckWithStats\r\nimport com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel\r\n\r\n@OptIn(ExperimentalMaterial3Api::class)\r\n@Composable\r\nfun DeckListScreen(\r\n    navController: NavController,\r\n    viewModel: FlashcardAppViewModel\r\n) {\r\n    val deckListState by viewModel.deckListUiState.collectAsState()\r\n    var showCreateDeckDialog by remember { mutableStateOf(false) }\r\n\r\n    Scaffold(\r\n        topBar = {\r\n            TopAppBar(\r\n                title = { Text(\"Flashcards\") },\r\n                actions = {\r\n                    IconButton(onClick = { navController.navigate(\"stats\") }) {\r\n                        Icon(Icons.Default.MoreVert, contentDescription = \"Statistics\")\r\n                    }\r\n                    IconButton(onClick = { navController.navigate(\"locations\") }) {\r\n                        Icon(Icons.Default.LocationOn, contentDescription = \"Locations\")\r\n                    }\r\n                }\r\n            )\r\n        },\r\n        floatingActionButton = {\r\n            FloatingActionButton(onClick = { showCreateDeckDialog = true }) {\r\n                Icon(Icons.Default.Add, contentDescription = \"Add Deck\")\r\n            }\r\n        }\r\n    ) { paddingValues ->\r\n        Box(\r\n            modifier = Modifier\r\n                .fillMaxSize()\r\n                .padding(paddingValues)\r\n        ) {\r\n            if (deckListState.isLoading) {\r\n                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))\r\n            } else if (deckListState.decks.isEmpty()) {\r\n                Text(\r\n                    text = \"Nenhum baralho encontrado. Crie um novo!\",\r\n                    modifier = Modifier\r\n                        .align(Alignment.Center)\r\n                        .padding(16.dp)\r\n                )\r\n            } else {\r\n                LazyColumn(\r\n                    modifier = Modifier.fillMaxSize(),\r\n                    contentPadding = PaddingValues(16.dp),\r\n                    verticalArrangement = Arrangement.spacedBy(8.dp)\r\n                ) {\r\n                    items(deckListState.decks) { deckWithStats ->\r\n                        DeckCard(\r\n                            deckWithStats = deckWithStats,\r\n                            onClick = { navController.navigate(\"deck/${deckWithStats.deck.deckId}\") },\r\n                            onStudyClick = { navController.navigate(\"study/${deckWithStats.deck.deckId}\") }\r\n                        )\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    if (showCreateDeckDialog) {\r\n        CreateDeckDialog(\r\n            onDismiss = { showCreateDeckDialog = false },\r\n            onCreate = { name, description ->\r\n                viewModel.createDeck(name, description)\r\n                showCreateDeckDialog = false\r\n            }\r\n        )\r\n    }\r\n}\r\n\r\n@OptIn(ExperimentalMaterial3Api::class)\r\n@Composable\r\nfun DeckCard(\r\n    deckWithStats: DeckWithStats,\r\n    onClick: () -> Unit,\r\n    onStudyClick: () -> Unit\r\n) {\r\n    Card(\r\n        onClick = onClick,\r\n        modifier = Modifier.fillMaxWidth()\r\n    ) {\r\n        Column(\r\n            modifier = Modifier.padding(16.dp)\r\n        ) {\r\n            Text(\r\n                text = deckWithStats.deck.name,\r\n                style = MaterialTheme.typography.titleMedium\r\n            )\r\n\r\n            if (!deckWithStats.deck.description.isNullOrEmpty()) {\r\n                Text(\r\n                    text = deckWithStats.deck.description,\r\n                    style = MaterialTheme.typography.bodyMedium,\r\n                    maxLines = 2,\r\n                    overflow = TextOverflow.Ellipsis,\r\n                    modifier = Modifier.padding(top = 4.dp)\r\n                )\r\n            }\r\n\r\n            Row(\r\n                modifier = Modifier\r\n                    .fillMaxWidth()\r\n                    .padding(top = 8.dp),\r\n                horizontalArrangement = Arrangement.SpaceBetween,\r\n                verticalAlignment = Alignment.CenterVertically\r\n            ) {\r\n                Text(\r\n                    text = \"Cartões: ${deckWithStats.cardCount} (${deckWithStats.dueCardCount} para revisar)\",\r\n                    style = MaterialTheme.typography.bodySmall\r\n                )\r\n\r\n                if (deckWithStats.dueCardCount > 0) {\r\n                    Button(onClick = onStudyClick) {\r\n                        Text(\"Estudar\")\r\n                    }\r\n                } else {\r\n                    OutlinedButton(onClick = onStudyClick) {\r\n                        Text(\"Revisar\")\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun CreateDeckDialog(\r\n    onDismiss: () -> Unit,\r\n    onCreate: (name: String, description: String?) -> Unit\r\n) {\r\n    var deckName by remember { mutableStateOf(\"\") }\r\n    var deckDescription by remember { mutableStateOf(\"\") }\r\n\r\n    AlertDialog(\r\n        onDismissRequest = onDismiss,\r\n        title = { Text(\"Criar Novo Baralho\") },\r\n        text = {\r\n            Column {\r\n                OutlinedTextField(\r\n                    value = deckName,\r\n                    onValueChange = { deckName = it },\r\n                    label = { Text(\"Nome do Baralho\") },\r\n                    modifier = Modifier.fillMaxWidth()\r\n                )\r\n\r\n                Spacer(modifier = Modifier.height(8.dp))\r\n\r\n                OutlinedTextField(\r\n                    value = deckDescription,\r\n                    onValueChange = { deckDescription = it },\r\n                    label = { Text(\"Descrição (Opcional)\") },\r\n                    modifier = Modifier.fillMaxWidth()\r\n                )\r\n            }\r\n        },\r\n        confirmButton = {\r\n            Button(\r\n                onClick = { onCreate(deckName, deckDescription.ifEmpty { null }) },\r\n                enabled = deckName.isNotBlank()\r\n            ) {\r\n                Text(\"Criar\")\r\n            }\r\n        },\r\n        dismissButton = {\r\n            TextButton(onClick = onDismiss) {\r\n                Text(\"Cancelar\")\r\n            }\r\n        }\r\n    )\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt b/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt
+--- a/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt	(revision d01948577e0be816dc29ec572263c04f4fc1d29b)
++++ b/app/src/main/java/com/example/flashcardapp/ui/screens/DeckListScreen.kt	(date 1746233414286)
+@@ -1,23 +1,69 @@
+ package com.example.flashcardapp.ui.screens
+ 
+-
+-import androidx.compose.foundation.layout.*
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.PaddingValues
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.Spacer
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.height
++import androidx.compose.foundation.layout.padding
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
++import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.Add
+ import androidx.compose.material.icons.filled.LocationOn
+ import androidx.compose.material.icons.filled.MoreVert
+-import androidx.compose.material3.*
+-import androidx.compose.runtime.*
++import androidx.compose.material3.AlertDialog
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Card
++import androidx.compose.material3.CardDefaults
++import androidx.compose.material3.CircularProgressIndicator
++import androidx.compose.material3.ExperimentalMaterial3Api
++import androidx.compose.material3.FloatingActionButton
++import androidx.compose.material3.Icon
++import androidx.compose.material3.IconButton
++import androidx.compose.material3.MaterialTheme
++import androidx.compose.material3.OutlinedButton
++import androidx.compose.material3.OutlinedTextField
++import androidx.compose.material3.OutlinedTextFieldDefaults
++import androidx.compose.material3.Scaffold
++import androidx.compose.material3.Text
++import androidx.compose.material3.TextButton
++import androidx.compose.material3.TopAppBar
++import androidx.compose.material3.TopAppBarDefaults
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.collectAsState
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.setValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.text.style.TextOverflow
+ import androidx.compose.ui.unit.dp
+ import androidx.navigation.NavController
+ import com.example.flashcardapp.ui.model.DeckWithStats
+ import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
+ 
++// Definindo as cores da nova paleta
++private val GreenPrimary = Color(0xFF4CAF50) // Verde principal
++private val GreenDark = Color(0xFF388E3C) // Verde escuro para elementos de destaque
++private val GreenLight = Color(0xFFC8E6C9) // Verde claro para fundos secundários
++private val BlueDark = Color(0xFF1A237E) // Azul profundo para contraste
++private val GreenPale = Color(0xFFE8F5E9) // Verde pálido para fundos
++private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos interativos
++private val GrayLight = Color(0xFFF5F5F5) // Cinza claro para áreas de texto
++private val GrayDark = Color(0xFF424242) // Cinza escuro para textos principais
++private val RedError = Color(0xFFEF5350) // Vermelho para erros
++private val BlueInfo = Color(0xFF42A5F5) // Azul para informações
++
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
+ fun DeckListScreen(
+@@ -28,21 +74,31 @@
+     var showCreateDeckDialog by remember { mutableStateOf(false) }
+ 
+     Scaffold(
++        containerColor = GreenPale,
+         topBar = {
+             TopAppBar(
+-                title = { Text("Flashcards") },
++                title = { Text("Flashcards", color = GrayDark) },
++                colors = TopAppBarDefaults.topAppBarColors(
++                    containerColor = GreenPrimary,
++                    titleContentColor = Color.White,
++                    actionIconContentColor = Color.White
++                ),
+                 actions = {
+                     IconButton(onClick = { navController.navigate("stats") }) {
+-                        Icon(Icons.Default.MoreVert, contentDescription = "Statistics")
++                        Icon(Icons.Default.MoreVert, contentDescription = "Statistics", tint = Color.White)
+                     }
+                     IconButton(onClick = { navController.navigate("locations") }) {
+-                        Icon(Icons.Default.LocationOn, contentDescription = "Locations")
++                        Icon(Icons.Default.LocationOn, contentDescription = "Locations", tint = Color.White)
+                     }
+                 }
+             )
+         },
+         floatingActionButton = {
+-            FloatingActionButton(onClick = { showCreateDeckDialog = true }) {
++            FloatingActionButton(
++                onClick = { showCreateDeckDialog = true },
++                containerColor = GreenDark,
++                contentColor = Color.White
++            ) {
+                 Icon(Icons.Default.Add, contentDescription = "Add Deck")
+             }
+         }
+@@ -50,13 +106,18 @@
+         Box(
+             modifier = Modifier
+                 .fillMaxSize()
++                .background(GreenPale)
+                 .padding(paddingValues)
+         ) {
+             if (deckListState.isLoading) {
+-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
++                CircularProgressIndicator(
++                    modifier = Modifier.align(Alignment.Center),
++                    color = GreenDark
++                )
+             } else if (deckListState.decks.isEmpty()) {
+                 Text(
+                     text = "Nenhum baralho encontrado. Crie um novo!",
++                    color = GrayDark,
+                     modifier = Modifier
+                         .align(Alignment.Center)
+                         .padding(16.dp)
+@@ -99,20 +160,24 @@
+ ) {
+     Card(
+         onClick = onClick,
+-        modifier = Modifier.fillMaxWidth()
++        modifier = Modifier.fillMaxWidth(),
++        colors = CardDefaults.cardColors(containerColor = Color.White),
++        shape = RoundedCornerShape(8.dp)
+     ) {
+         Column(
+             modifier = Modifier.padding(16.dp)
+         ) {
+             Text(
+                 text = deckWithStats.deck.name,
+-                style = MaterialTheme.typography.titleMedium
++                style = MaterialTheme.typography.titleMedium,
++                color = GrayDark
+             )
+ 
+             if (!deckWithStats.deck.description.isNullOrEmpty()) {
+                 Text(
+                     text = deckWithStats.deck.description,
+                     style = MaterialTheme.typography.bodyMedium,
++                    color = GrayDark.copy(alpha = 0.8f),
+                     maxLines = 2,
+                     overflow = TextOverflow.Ellipsis,
+                     modifier = Modifier.padding(top = 4.dp)
+@@ -128,15 +193,27 @@
+             ) {
+                 Text(
+                     text = "Cartões: ${deckWithStats.cardCount} (${deckWithStats.dueCardCount} para revisar)",
+-                    style = MaterialTheme.typography.bodySmall
++                    style = MaterialTheme.typography.bodySmall,
++                    color = if (deckWithStats.dueCardCount > 0) AmberAccent else BlueDark
+                 )
+ 
+                 if (deckWithStats.dueCardCount > 0) {
+-                    Button(onClick = onStudyClick) {
++                    Button(
++                        onClick = onStudyClick,
++                        colors = ButtonDefaults.buttonColors(
++                            containerColor = GreenDark,
++                            contentColor = Color.White
++                        )
++                    ) {
+                         Text("Estudar")
+                     }
+                 } else {
+-                    OutlinedButton(onClick = onStudyClick) {
++                    OutlinedButton(
++                        onClick = onStudyClick,
++                        colors = ButtonDefaults.outlinedButtonColors(
++                            contentColor = GreenDark
++                        )
++                    ) {
+                         Text("Revisar")
+                     }
+                 }
+@@ -155,14 +232,23 @@
+ 
+     AlertDialog(
+         onDismissRequest = onDismiss,
++        containerColor = Color.White,
++        titleContentColor = GrayDark,
++        textContentColor = GrayDark,
+         title = { Text("Criar Novo Baralho") },
+         text = {
+             Column {
+                 OutlinedTextField(
+                     value = deckName,
+                     onValueChange = { deckName = it },
+-                    label = { Text("Nome do Baralho") },
+-                    modifier = Modifier.fillMaxWidth()
++                    label = { Text("Nome do Baralho", color = GrayDark.copy(alpha = 0.7f)) },
++                    modifier = Modifier.fillMaxWidth(),
++                    colors = OutlinedTextFieldDefaults.colors(
++                        focusedBorderColor = GreenPrimary,
++                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),
++                        focusedTextColor = GrayDark,
++                        unfocusedTextColor = GrayDark
++                    )
+                 )
+ 
+                 Spacer(modifier = Modifier.height(8.dp))
+@@ -170,21 +256,37 @@
+                 OutlinedTextField(
+                     value = deckDescription,
+                     onValueChange = { deckDescription = it },
+-                    label = { Text("Descrição (Opcional)") },
+-                    modifier = Modifier.fillMaxWidth()
++                    label = { Text("Descrição (Opcional)", color = GrayDark.copy(alpha = 0.7f)) },
++                    modifier = Modifier.fillMaxWidth(),
++                    colors = OutlinedTextFieldDefaults.colors(
++                        focusedBorderColor = GreenPrimary,
++                        unfocusedBorderColor = GrayDark.copy(alpha = 0.5f),
++                        focusedTextColor = GrayDark,
++                        unfocusedTextColor = GrayDark
++                    )
+                 )
+             }
+         },
+         confirmButton = {
+             Button(
+                 onClick = { onCreate(deckName, deckDescription.ifEmpty { null }) },
+-                enabled = deckName.isNotBlank()
++                enabled = deckName.isNotBlank(),
++                colors = ButtonDefaults.buttonColors(
++                    containerColor = GreenDark,
++                    contentColor = Color.White,
++                    disabledContainerColor = GreenDark.copy(alpha = 0.5f)
++                )
+             ) {
+                 Text("Criar")
+             }
+         },
+         dismissButton = {
+-            TextButton(onClick = onDismiss) {
++            TextButton(
++                onClick = onDismiss,
++                colors = ButtonDefaults.textButtonColors(
++                    contentColor = BlueDark
++                )
++            ) {
+                 Text("Cancelar")
+             }
+         }
+Index: app/src/main/java/com/example/flashcardapp/ui/screens/StatsScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.flashcardapp.ui.screens\r\n\r\nimport androidx.compose.foundation.layout.Box\r\nimport androidx.compose.foundation.layout.Column\r\nimport androidx.compose.foundation.layout.Spacer\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.foundation.layout.fillMaxWidth\r\nimport androidx.compose.foundation.layout.height\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.compose.foundation.rememberScrollState\r\nimport androidx.compose.foundation.verticalScroll\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.ArrowBack\r\nimport androidx.compose.material3.Card\r\nimport androidx.compose.material3.CardDefaults\r\nimport androidx.compose.material3.CircularProgressIndicator\r\nimport androidx.compose.material3.ExperimentalMaterial3Api\r\nimport androidx.compose.material3.Icon\r\nimport androidx.compose.material3.IconButton\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.Scaffold\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.material3.TopAppBar\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.collectAsState\r\nimport androidx.compose.runtime.getValue\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.navigation.NavController\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.unit.dp\r\nimport com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel\r\nimport kotlin.math.roundToInt\r\n\r\n\r\n@OptIn(ExperimentalMaterial3Api::class)\r\n@Composable\r\nfun StatsScreen(\r\n    navController: NavController,\r\n    viewModel: FlashcardAppViewModel\r\n) {\r\n    val userStatsState by viewModel.userStatsUiState.collectAsState()\r\n\r\n    Scaffold(\r\n        topBar = {\r\n            TopAppBar(\r\n                title = { Text(\"Estatísticas de Estudo\") },\r\n                navigationIcon = {\r\n                    IconButton(onClick = { navController.popBackStack() }) {\r\n                        Icon(Icons.Default.ArrowBack, contentDescription = \"Voltar\")\r\n                    }\r\n                }\r\n            )\r\n        }\r\n    ) { paddingValues ->\r\n        Box(\r\n            modifier = Modifier\r\n                .fillMaxSize()\r\n                .padding(paddingValues)\r\n        ) {\r\n            if (userStatsState.isLoading) {\r\n                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))\r\n            } else {\r\n                Column(\r\n                    modifier = Modifier\r\n                        .fillMaxSize()\r\n                        .padding(16.dp)\r\n                        .verticalScroll(rememberScrollState()),\r\n                    horizontalAlignment = Alignment.CenterHorizontally\r\n                ) {\r\n                    // Dias consecutivos\r\n                    StatsCard(\r\n                        title = \"Dias Consecutivos\",\r\n                        value = userStatsState.streakDays.toString(),\r\n                        subtitle = \"Melhor sequência: ${userStatsState.maxStreakDays} dias\"\r\n                    )\r\n\r\n                    Spacer(modifier = Modifier.height(16.dp))\r\n\r\n                    // Taxa de acerto\r\n                    StatsCard(\r\n                        title = \"Taxa de Acertos\",\r\n                        value = \"${(userStatsState.correctAnswerRate * 100).roundToInt()}%\",\r\n                        subtitle = \"Continue melhorando!\"\r\n                    )\r\n\r\n                    Spacer(modifier = Modifier.height(16.dp))\r\n\r\n                    // Total de dias estudados\r\n                    StatsCard(\r\n                        title = \"Total de Dias Estudados\",\r\n                        value = userStatsState.totalStudyDays.toString(),\r\n                        subtitle = \"Sua jornada de aprendizado\"\r\n                    )\r\n\r\n                    Spacer(modifier = Modifier.height(32.dp))\r\n\r\n                    Text(\r\n                        text = \"Mantenha sua rotina de estudos para resultados melhores!\",\r\n                        style = MaterialTheme.typography.bodyLarge,\r\n                        textAlign = TextAlign.Center\r\n                    )\r\n\r\n                    Spacer(modifier = Modifier.height(16.dp))\r\n\r\n                    if (userStatsState.streakDays > 0) {\r\n                        Card(\r\n                            modifier = Modifier\r\n                                .fillMaxWidth()\r\n                                .padding(vertical = 8.dp),\r\n                            colors = CardDefaults.cardColors(\r\n                                containerColor = MaterialTheme.colorScheme.primaryContainer\r\n                            )\r\n                        ) {\r\n                            Column(\r\n                                modifier = Modifier.padding(16.dp),\r\n                                horizontalAlignment = Alignment.CenterHorizontally\r\n                            ) {\r\n                                Text(\r\n                                    text = \"Sequência Atual\",\r\n                                    style = MaterialTheme.typography.titleMedium,\r\n                                    color = MaterialTheme.colorScheme.onPrimaryContainer\r\n                                )\r\n\r\n                                Spacer(modifier = Modifier.height(8.dp))\r\n\r\n                                Text(\r\n                                    text = \"${userStatsState.streakDays} dias\",\r\n                                    style = MaterialTheme.typography.displaySmall,\r\n                                    color = MaterialTheme.colorScheme.onPrimaryContainer\r\n                                )\r\n\r\n                                Spacer(modifier = Modifier.height(8.dp))\r\n\r\n                                Text(\r\n                                    text = \"Continue estudando para manter sua sequência!\",\r\n                                    style = MaterialTheme.typography.bodyMedium,\r\n                                    color = MaterialTheme.colorScheme.onPrimaryContainer,\r\n                                    textAlign = TextAlign.Center\r\n                                )\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun StatsCard(\r\n    title: String,\r\n    value: String,\r\n    subtitle: String\r\n) {\r\n    Card(\r\n        modifier = Modifier.fillMaxWidth()\r\n    ) {\r\n        Column(\r\n            modifier = Modifier\r\n                .fillMaxWidth()\r\n                .padding(16.dp),\r\n            horizontalAlignment = Alignment.CenterHorizontally\r\n        ) {\r\n            Text(\r\n                text = title,\r\n                style = MaterialTheme.typography.titleMedium\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(8.dp))\r\n\r\n            Text(\r\n                text = value,\r\n                style = MaterialTheme.typography.headlineLarge\r\n            )\r\n\r\n            Spacer(modifier = Modifier.height(4.dp))\r\n\r\n            Text(\r\n                text = subtitle,\r\n                style = MaterialTheme.typography.bodyMedium,\r\n                textAlign = TextAlign.Center\r\n            )\r\n        }\r\n    }\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/flashcardapp/ui/screens/StatsScreen.kt b/app/src/main/java/com/example/flashcardapp/ui/screens/StatsScreen.kt
+--- a/app/src/main/java/com/example/flashcardapp/ui/screens/StatsScreen.kt	(revision d01948577e0be816dc29ec572263c04f4fc1d29b)
++++ b/app/src/main/java/com/example/flashcardapp/ui/screens/StatsScreen.kt	(date 1746233426080)
+@@ -1,5 +1,6 @@
+ package com.example.flashcardapp.ui.screens
+ 
++import androidx.compose.foundation.background
+ import androidx.compose.foundation.layout.Box
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.foundation.layout.Spacer
+@@ -8,6 +9,7 @@
+ import androidx.compose.foundation.layout.height
+ import androidx.compose.foundation.layout.padding
+ import androidx.compose.foundation.rememberScrollState
++import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.foundation.verticalScroll
+ import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.ArrowBack
+@@ -21,18 +23,32 @@
+ import androidx.compose.material3.Scaffold
+ import androidx.compose.material3.Text
+ import androidx.compose.material3.TopAppBar
++import androidx.compose.material3.TopAppBarDefaults
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.collectAsState
+ import androidx.compose.runtime.getValue
++import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+-import androidx.navigation.NavController
+-import androidx.compose.ui.Alignment
++import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.text.style.TextAlign
+ import androidx.compose.ui.unit.dp
++import androidx.navigation.NavController
+ import com.example.flashcardapp.ui.viewmodel.FlashcardAppViewModel
+ import kotlin.math.roundToInt
+ 
+ 
++// Definindo as cores da nova paleta
++private val GreenPrimary = Color(0xFF4CAF50) // Verde principal
++private val GreenDark = Color(0xFF388E3C) // Verde escuro para elementos de destaque
++private val GreenLight = Color(0xFFC8E6C9) // Verde claro para fundos secundários
++private val BlueDark = Color(0xFF1A237E) // Azul profundo para contraste
++private val GreenPale = Color(0xFFE8F5E9) // Verde pálido para fundos
++private val AmberAccent = Color(0xFFFFAB00) // Âmbar para elementos interativos
++private val GrayLight = Color(0xFFF5F5F5) // Cinza claro para áreas de texto
++private val GrayDark = Color(0xFF424242) // Cinza escuro para textos principais
++private val RedError = Color(0xFFEF5350) // Vermelho para erros
++private val BlueInfo = Color(0xFF42A5F5) // Azul para informações
++
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
+ fun StatsScreen(
+@@ -42,9 +58,15 @@
+     val userStatsState by viewModel.userStatsUiState.collectAsState()
+ 
+     Scaffold(
++        containerColor = GreenPale,
+         topBar = {
+             TopAppBar(
+-                title = { Text("Estatísticas de Estudo") },
++                title = { Text("Estatísticas de Estudo", color = Color.White) },
++                colors = TopAppBarDefaults.topAppBarColors(
++                    containerColor = GreenPrimary,
++                    titleContentColor = Color.White,
++                    navigationIconContentColor = Color.White
++                ),
+                 navigationIcon = {
+                     IconButton(onClick = { navController.popBackStack() }) {
+                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+@@ -56,10 +78,14 @@
+         Box(
+             modifier = Modifier
+                 .fillMaxSize()
++                .background(GreenPale)
+                 .padding(paddingValues)
+         ) {
+             if (userStatsState.isLoading) {
+-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
++                CircularProgressIndicator(
++                    modifier = Modifier.align(Alignment.Center),
++                    color = GreenDark
++                )
+             } else {
+                 Column(
+                     modifier = Modifier
+@@ -72,7 +98,8 @@
+                     StatsCard(
+                         title = "Dias Consecutivos",
+                         value = userStatsState.streakDays.toString(),
+-                        subtitle = "Melhor sequência: ${userStatsState.maxStreakDays} dias"
++                        subtitle = "Melhor sequência: ${userStatsState.maxStreakDays} dias",
++                        valueColor = AmberAccent
+                     )
+ 
+                     Spacer(modifier = Modifier.height(16.dp))
+@@ -81,7 +108,8 @@
+                     StatsCard(
+                         title = "Taxa de Acertos",
+                         value = "${(userStatsState.correctAnswerRate * 100).roundToInt()}%",
+-                        subtitle = "Continue melhorando!"
++                        subtitle = "Continue melhorando!",
++                        valueColor = GreenDark
+                     )
+ 
+                     Spacer(modifier = Modifier.height(16.dp))
+@@ -90,7 +118,8 @@
+                     StatsCard(
+                         title = "Total de Dias Estudados",
+                         value = userStatsState.totalStudyDays.toString(),
+-                        subtitle = "Sua jornada de aprendizado"
++                        subtitle = "Sua jornada de aprendizado",
++                        valueColor = BlueInfo
+                     )
+ 
+                     Spacer(modifier = Modifier.height(32.dp))
+@@ -98,7 +127,8 @@
+                     Text(
+                         text = "Mantenha sua rotina de estudos para resultados melhores!",
+                         style = MaterialTheme.typography.bodyLarge,
+-                        textAlign = TextAlign.Center
++                        textAlign = TextAlign.Center,
++                        color = GrayDark
+                     )
+ 
+                     Spacer(modifier = Modifier.height(16.dp))
+@@ -109,8 +139,9 @@
+                                 .fillMaxWidth()
+                                 .padding(vertical = 8.dp),
+                             colors = CardDefaults.cardColors(
+-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+-                            )
++                                containerColor = GreenDark
++                            ),
++                            shape = RoundedCornerShape(8.dp)
+                         ) {
+                             Column(
+                                 modifier = Modifier.padding(16.dp),
+@@ -119,7 +150,7 @@
+                                 Text(
+                                     text = "Sequência Atual",
+                                     style = MaterialTheme.typography.titleMedium,
+-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
++                                    color = Color.White
+                                 )
+ 
+                                 Spacer(modifier = Modifier.height(8.dp))
+@@ -127,7 +158,7 @@
+                                 Text(
+                                     text = "${userStatsState.streakDays} dias",
+                                     style = MaterialTheme.typography.displaySmall,
+-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
++                                    color = AmberAccent
+                                 )
+ 
+                                 Spacer(modifier = Modifier.height(8.dp))
+@@ -135,7 +166,7 @@
+                                 Text(
+                                     text = "Continue estudando para manter sua sequência!",
+                                     style = MaterialTheme.typography.bodyMedium,
+-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
++                                    color = Color.White,
+                                     textAlign = TextAlign.Center
+                                 )
+                             }
+@@ -151,10 +182,13 @@
+ fun StatsCard(
+     title: String,
+     value: String,
+-    subtitle: String
++    subtitle: String,
++    valueColor: Color
+ ) {
+     Card(
+-        modifier = Modifier.fillMaxWidth()
++        modifier = Modifier.fillMaxWidth(),
++        colors = CardDefaults.cardColors(containerColor = Color.White),
++        shape = RoundedCornerShape(8.dp)
+     ) {
+         Column(
+             modifier = Modifier
+@@ -164,14 +198,16 @@
+         ) {
+             Text(
+                 text = title,
+-                style = MaterialTheme.typography.titleMedium
++                style = MaterialTheme.typography.titleMedium,
++                color = GrayDark
+             )
+ 
+             Spacer(modifier = Modifier.height(8.dp))
+ 
+             Text(
+                 text = value,
+-                style = MaterialTheme.typography.headlineLarge
++                style = MaterialTheme.typography.headlineLarge,
++                color = valueColor
+             )
+ 
+             Spacer(modifier = Modifier.height(4.dp))
+@@ -179,6 +215,7 @@
+             Text(
+                 text = subtitle,
+                 style = MaterialTheme.typography.bodyMedium,
++                color = GrayDark.copy(alpha = 0.8f),
+                 textAlign = TextAlign.Center
+             )
+         }
